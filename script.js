@@ -12,6 +12,7 @@ const addFirstItemBtn = document.getElementById("addFirstItemBtn");
 const addMoreBtn = document.getElementById("addMoreBtn");
 const notesInput = document.getElementById("notes");
 const orderloInput = document.getElementById("orderlo");
+const ordernaInput = document.getElementById("ordernam");
 
 let itemCount = 0; // we always build rows dynamically
 
@@ -170,6 +171,9 @@ orderForm.addEventListener("submit", (e) => {
     msg += `- ${dish} × ${qty} = ₦${line.toLocaleString()}%0A`;
   });
 
+const nameor = ordernaInput?.value.trim();
+  if (nameor) msg += `%0AName: ${encodeURIComponent(nameor)}%0A`;
+   
 const locationor = orderloInput?.value.trim();
   if (locationor) msg += `%0ALocation: ${encodeURIComponent(locationor)}%0A`;
    
