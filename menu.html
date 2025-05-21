@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mummachis Restaurant - Authentic Nigerian Cuisine</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- Same header as index.html -->
+    <header>
+      <header>
+        <div class="container">
+          <nav class="navbar">
+            <a
+                href="index.html"
+                role="menuitem"
+                tabindex="0"
+                class="active"
+                ><div
+                class="logo"
+                tabindex="0"
+                aria-label="Mummachis Restaurant Logo"
+              >
+                <img
+                  src="https://cradle2career.ng/wp-content/uploads/2025/05/tinywow_mummachis-correction-0_80621441.png"
+                  alt="Mummachislogo"
+                  class="Mummachislogo"
+                  
+                />
+                Mummachis<span>Kitchen</span>
+              </div></a>
+
+            <ul
+              class="nav-links"
+              id="nav-links"
+              role="menubar"
+              aria-label="Primary navigation"
+            >
+              <li role="none">
+                <a href="index.html" role="menuitem" tabindex="0" class="active"
+                  >Home</a
+                >
+              </li>
+              <li role="none">
+                <a href="#menu" role="menuitem" tabindex="0">Menu</a>
+              </li>
+              <li role="none">
+                <a href="contact.html" role="menuitem" tabindex="0">Services</a>
+              </li>
+            </ul>
+            <div class="hamburger">
+              <i class="fas fa-bars"></i>
+            </div>
+          </nav>
+        </div>
+      </header>
+    </header>
+
+    <main>
+      <section id="full-menu" class="section">
+        <div class="container">
+          <div class="section-title">
+            <h2 class="menu-head">Our Complete Menu</h2>
+          </div>
+          <div class="menu-items" id="all-menu-items">
+            <!-- All dishes will load here via JavaScript -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Include the order section -->
+      <section id="order" class="section">
+        <section
+          id="order"
+          class="section"
+          tabindex="0"
+          aria-label="Place an Order"
+        >
+          <div class="container">
+            <div class="section-title">
+              <h2>Place Your Order</h2>
+            </div>
+            <form
+              class="order-form"
+              id="orderForm"
+              aria-describedby="order-desc"
+              novalidate
+            >
+              <p id="order-desc">
+                Select your dishes, quantities, and add any special
+                instructions. Submit and your order will be sent to our WhatsApp
+                for quick processing.
+              </p>
+
+              <div id="orderItems">
+                <div class="order-item">
+                  <div class="form-group">
+                    <label for="menuItem1">Menu Item</label>
+                    <div id="orderItems"></div>
+                    <button type="button" id="addFirstItemBtn" class="btn-add">
+                      + Add first item
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                id="addMoreBtn"
+                class="add-more-btn"
+                aria-label="Add another dish to order"
+              >
+                <i class="fas fa-plus"></i> Add another dish
+              </button>
+
+              <div class="form-group">
+                <label for="notes"
+                  >Additional Instructions...Add your address for delivery
+                  (optional)</label
+                >
+                <textarea
+                  id="notes"
+                  name="notes"
+                  class="form-control"
+                  placeholder="E.g. less spicy, gluten free..."
+                ></textarea>
+              </div>
+
+              <button
+                type="submit"
+                class="submit-btn"
+                aria-label="Submit your order"
+              >
+                Send Order via WhatsApp
+              </button>
+            </form>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <!-- Same footer as index.html -->
+    <footer>
+      <footer role="contentinfo">
+        <div class="container">
+          <div class="footer-content">
+            <div class="footer-column">
+              <h3>Mummachis Kitchen</h3>
+              <p>
+                Bringing authentic Nigerian flavors to your table, without
+                making you breaak your pocket. Our passion for traditional
+                cuisine shines in every dish we serve.
+              </p>
+              <div class="social-links">
+                <a href="#" class="social-link" aria-label="Facebook"
+                  ><i class="fab fa-facebook-f"></i
+                ></a>
+                <a href="#" class="social-link" aria-label="Instagram"
+                  ><i class="fab fa-instagram"></i
+                ></a>
+                <a href="#" class="social-link" aria-label="Twitter"
+                  ><i class="fab fa-twitter"></i
+                ></a>
+              </div>
+            </div>
+            <div class="footer-column">
+              <h3>Contact Us</h3>
+              <p>
+                <i class="fas fa-map-marker-alt"></i> 15 Mokuolu Street, Ogba,
+                Ikeja, Lagos, Nigeria.
+              </p>
+              <p><i class="fas fa-phone"></i> +234 803 517 4263</p>
+              <p><i class="fas fa-envelope"></i> kelechinwankwo356@gmail.com</p>
+            </div>
+            <div class="footer-column">
+              <h3>Opening Hours</h3>
+              <p>Monday - Friday: 8am - 7pm</p>
+              <p>Saturday: 9am - 6pm</p>
+            </div>
+          </div>
+          <div class="footer-bottom">
+            &copy;2025 Mummachis Kitchen. All rights reserved.
+          </div>
+        </div>
+      </footer>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="menu.js"></script>
+  </body>
+</html>

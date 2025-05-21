@@ -1,0 +1,322 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Contact & Bookings | Mummachis</title>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+        />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+        />
+        <link rel="stylesheet" href="contact.css" />
+        <link rel="stylesheet" href="style.css" />
+      </head>
+      <body>
+        <header>
+          <div class="container">
+            <nav class="navbar">
+              <a
+                href="index.html"
+                role="menuitem"
+                tabindex="0"
+                class="active"
+                ><div
+                class="logo"
+                tabindex="0"
+                aria-label="Mummachis Restaurant Logo"
+              >
+                <img
+                  src="https://cradle2career.ng/wp-content/uploads/2025/05/tinywow_mummachis-correction-0_80621441.png"
+                  alt="Mummachislogo"
+                  class="Mummachislogo"
+                  
+                />
+                Mummachis<span>Kitchen</span>
+              </div></a>
+              
+              <ul
+                class="nav-links"
+                id="nav-links"
+                role="menubar"
+                aria-label="Primary navigation"
+              >
+                <li role="none">
+                  <a href="index.html" role="menuitem" tabindex="0" class="active"
+                  >Home</a
+                >
+                </li>
+                <li role="none">
+                  <a href="menu.html" role="menuitem" tabindex="0">Menu</a>
+                </li>
+                <li role="none">
+                  <a href="contact.html" role="menuitem" tabindex="0"
+                    >Services</a
+                  >
+                </li>
+              </ul>
+              <div class="hamburger"><i class="fas fa-bars"></i></div>
+            </nav>
+          </div>
+        </header>
+
+        <main>
+          <section class="contact-hero">
+            <div class="container">
+              <h1 class="chead">Contact & Bookings</h1>
+              <p class="hero-p">
+                Reserve your table for an unforgettable dining experience or
+                order your favorite dishes for takeaway
+              </p>
+              <div class="booking-tabs">
+                <button class="tab-btn active" data-tab="events">
+                  Outdoor Events
+                </button>
+                <button class="tab-btn" data-tab="takeaway">Takeaway</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="container">
+              <div id="events" class="tab-content active">
+                <form id="event-booking" class="booking-form">
+                  <h2 class="section-title">Book an Outdoor Event</h2>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="event-name">Your Name</label>
+                      <input
+                        type="text"
+                        id="event-name"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="event-email">Email</label>
+                      <input
+                        type="email"
+                        id="event-email"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="event-phone">Phone Number</label>
+                      <input
+                        type="tel"
+                        id="event-phone"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="event-guests">Number of Guests</label>
+                      <input
+                        type="number"
+                        id="event-guests"
+                        class="form-control"
+                        min="10"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="event-date">Event Date</label>
+                      <input
+                        type="text"
+                        id="event-date"
+                        class="form-control"
+                        placeholder="Select date"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="event-time">Event Time</label>
+                      <select id="event-time" class="form-control" required>
+                        <option value="">Select time</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="12:00 PM">12:00 PM</option>
+                        <option value="2:00 PM">2:00 PM</option>
+                        <option value="4:00 PM">4:00 PM</option>
+                        <option value="6:00 PM">6:00 PM</option>
+                        <option value="8:00 PM">8:00 PM</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="event-notes">Details of the event</label>
+                    <textarea
+                      id="event-notes"
+                      class="form-control"
+                      rows="4"
+                    ></textarea>
+                  </div>
+                  <button type="submit" class="submit-btn">Book Event</button>
+                </form>
+              </div>
+
+              <div id="takeaway" class="tab-content">
+                <form id="takeaway-booking" class="booking-form">
+                  <h2 class="section-title">Order Takeaway</h2>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="takeaway-name">Your Name</label>
+                      <input
+                        type="text"
+                        id="takeaway-name"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="takeaway-phone">Phone Number</label>
+                      <input
+                        type="tel"
+                        id="takeaway-phone"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="takeaway-date">Pickup Date</label>
+                      <input
+                        type="text"
+                        id="takeaway-date"
+                        class="form-control"
+                        placeholder="Select date"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="takeaway-time">Pickup Time</label>
+                      <input
+                        type="hidden"
+                        id="takeaway-time"
+                        name="takeaway-time"
+                        required
+                      />
+                      <div class="time-slots" id="time-slots">
+                        <!-- Time slots will be generated by JavaScript -->
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="takeaway-items">Items to Order</label>
+                    <div id="takeaway-items-container">
+                      <!-- Initial order item will be added here by JavaScript -->
+                    </div>
+                    <button
+                      type="button"
+                      class="add-more-btn"
+                      onclick="addTakeawayItem()"
+                    >
+                      <i class="fas fa-plus"></i> Add Another Item
+                    </button>
+                  </div>
+
+                  <div id="total-price" class="total-price">Total: ₦0</div>
+
+                  <div class="form-group">
+                    <label for="takeaway-notes">Special Instructions</label>
+                    <textarea
+                      id="takeaway-notes"
+                      class="form-control"
+                      rows="3"
+                    ></textarea>
+                  </div>
+
+                  <button type="submit" class="submit-btn">
+                    Place Takeaway Order
+                  </button>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <section class="contact-info">
+            <div class="info-card">
+              <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+              <h3>Our Location</h3>
+              <p>15 Mokuolu Street, Ogba, Ikeja.</p>
+              <p>Lagos, Nigeria.</p>
+              <a
+                href="https://maps.app.goo.gl/fDpLLHG5AT5MVQs58"
+                target="_blank"
+                >Get Directions →</a
+              >
+            </div>
+            <div class="info-card">
+              <div class="info-icon"><i class="fas fa-phone-alt"></i></div>
+              <h3>Call Us</h3>
+              <p>+234 8035 174 263</p>
+              <a href="tel:+2348035174263">Call Now →</a>
+            </div>
+            <div class="info-card">
+              <div class="info-icon"><i class="fas fa-envelope"></i></div>
+              <h3>Email Us</h3>
+              <p>bookings@mummachis.com</p>
+              <a href="mailto:kelechinwankwo356@gmail.com">Send Email →</a>
+            </div>
+          </section>
+        </main>
+
+        <div class="overlay" id="overlay"></div>
+        <div class="confirmation-message" id="confirmation-message">
+          <div class="checkmark"><i class="fas fa-check-circle"></i></div>
+          <h3 id="confirmation-title">Booking Confirmed!</h3>
+          <p id="confirmation-text">
+            Your booking has been successfully submitted. We'll contact you
+            shortly to confirm the details.
+          </p>
+          <button class="btn-primary" onclick="closeConfirmation()">
+            Close
+          </button>
+        </div>
+
+        <footer class="last">
+          <div class="container">
+            <div class="footer-bottom">
+              &copy;2025 Mummachis Kitchen. All rights reserved.
+            </div>
+          </div>
+        </footer>
+
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script src="contact.js"></script>
+        <script src="menu.js"></script>
+      </body>
+    </html>
+
+    <!-- Confirmation Modal -->
+    <div class="overlay" id="overlay"></div>
+    <div class="confirmation-message" id="confirmation-message">
+      <div class="checkmark">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h3 id="confirmation-title">Booking Confirmed!</h3>
+      <p id="confirmation-text">
+        Your booking has been successfully submitted. We'll contact you shortly
+        to confirm the details.
+      </p>
+      <button class="btn-primary" onclick="closeConfirmation()">Close</button>
+    </div>
+
+    <!-- --JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="contact.js"></script>
+    <script src="menu.js"></script>
+  </body>
+</html>

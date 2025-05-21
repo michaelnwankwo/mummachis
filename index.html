@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mummachis Restaurant - Authentic Nigerian Cuisine</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <!-- HEADER -->
+    <header>
+      <div class="container">
+        <nav class="navbar">
+          <a href="index.html" role="menuitem" tabindex="0" class="active"
+            ><div
+              class="logo"
+              tabindex="0"
+              aria-label="Mummachis Restaurant Logo"
+            >
+              <img
+                src="https://cradle2career.ng/wp-content/uploads/2025/05/tinywow_mummachis-correction-0_80621441.png"
+                alt="Mummachislogo"
+                class="Mummachislogo"
+              />
+              Mummachis<span>Kitchen</span>
+            </div></a
+          >
+
+          <ul
+            class="nav-links"
+            id="nav-links"
+            role="menubar"
+            aria-label="Primary navigation"
+          >
+            <li role="none">
+              <a href="#about" role="menuitem" tabindex="0" class="active"
+                >Home</a
+              >
+            </li>
+            <li role="none">
+              <a href="menu.html" role="menuitem" tabindex="0">Menu</a>
+            </li>
+            <li role="none">
+              <a href="contact.html" role="menuitem" tabindex="0">Services</a>
+            </li>
+            <li role="none">
+              <a href="#order" role="menuitem" tabindex="0">Order</a>
+            </li>
+          </ul>
+          <div class="hamburger">
+            <i class="fas fa-bars"></i>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero" role="banner" aria-label="Welcome Banner">
+      <div class="hero-content">
+        <video
+          class="hero__video"
+          src="https://cradle2career.ng/wp-content/uploads/2025/05/hero.mp4"
+          poster="fallback.jpg"
+          autoplay
+          muted
+          loop
+          playsinline
+        ></video>
+        <div class="hero__overlay"></div>
+        <h1 class="hero-h1">Welcome to Mummachis</h1>
+        <h1 class="hero-h1">Kitchen</h1>
+        <p class="hero-p">
+          Authentic Nigerian cuisine with a warm, vibrant atmosphere
+        </p>
+        <div class="hero-btns">
+          <a href="#order" class="btn btn-primary" aria-label="Place your order"
+            >Order Now</a
+          >
+          <a
+            href="menu.html"
+            class="btn btn-secondary"
+            aria-label="View our menu"
+            >View Menu</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <main>
+      <!-- ABOUT SECTION -->
+      <section
+        id="about"
+        class="section"
+        tabindex="0"
+        aria-label="About Nigerian Delight Restaurant"
+      >
+        <div class="container">
+          <div class="section-title">
+            <h2>Our Story</h2>
+          </div>
+          <div class="about-content">
+            <div class="about-img">
+              <img
+                src="https://images.unsplash.com/photo-1609181505110-4ba37fdb6f8d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+                alt="Interior of Nigerian restaurant with traditional decor"
+              />
+            </div>
+            <div class="about-text">
+              <h3 class="Unique">Our Unique Atmosphere</h3>
+              <p>
+                At Mummachis Kitchen, we bring you the heart of Nigeria through
+                delicious meals crafted with local ingredients and traditional
+                recipes passed down through generations.
+              </p>
+              <p>
+                Our vibrant and welcoming atmosphere is perfect for family
+                dinners, celebrations, and casual hangouts. Experience the
+                warmth of Nigerian culture combined with exceptional
+                hospitality.
+              </p>
+              <div class="about-features">
+                <div class="feature-item">
+                  <div class="feature-icon">
+                    <i class="fas fa-utensils"></i>
+                  </div>
+                  <div class="feature-text">
+                    <h4>Authentic Recipes</h4>
+                    <p>Traditional dishes made with original recipes</p>
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <div class="feature-icon">
+                    <i class="fas fa-leaf"></i>
+                  </div>
+                  <div class="feature-text">
+                    <h4>Fresh Ingredients</h4>
+                    <p>Locally sourced, high-quality ingredients</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MENU SECTION -->
+      <!-- In your menu section -->
+      <section
+        id="menu"
+        class="section"
+        tabindex="0"
+        aria-label="Restaurant Menu"
+      >
+        <div class="container">
+          <div class="section-title">
+            <h2>Our Featured Menu</h2>
+          </div>
+          <div class="menu-items" id="featured-menu">
+            <!-- Featured dishes will load here via JavaScript -->
+          </div>
+          <div class="view-all-container">
+            <a href="menu.html" class="btn btn-secondary">View Full Menu</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- SERVICES SECTION -->
+      <section
+        id="services"
+        class="section"
+        tabindex="0"
+        aria-label="Services Offered"
+      >
+        <div class="container">
+          <div class="section-title">
+            <h2>Our Services</h2>
+          </div>
+          <div class="services-grid">
+            <div class="service-card" tabindex="0" aria-label="Dine‑in">
+              <div class="service-icon">
+                <i class="fas fa-utensils"></i>
+              </div>
+              <h3>Dine‑in</h3>
+              <p>Enjoy our cozy restaurant ambience with family and friends.</p>
+            </div>
+
+            <div class="service-card" tabindex="0" aria-label="Takeaway">
+              <div class="service-icon">
+                <i class="fas fa-shopping-bag"></i>
+              </div>
+              <h3>Takeaway</h3>
+              <p>
+                Order your favorite dishes and pick them up at your convenience.
+              </p>
+            </div>
+
+            <div class="service-card" tabindex="0" aria-label="Catering">
+              <div class="service-icon">
+                <i class="fas fa-glass-cheers"></i>
+              </div>
+              <h3>Catering</h3>
+              <p>
+                Let us cater your celebrations with authentic Nigerian cuisine.
+              </p>
+            </div>
+
+            <div class="service-card" tabindex="0" aria-label="Event Hosting">
+              <div class="service-icon">
+                <i class="fas fa-calendar-alt"></i>
+              </div>
+              <h3>Event Hosting</h3>
+              <p>Host your events in our space with personalized service.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ORDER SECTION -->
+      <section
+        id="order"
+        class="section"
+        tabindex="0"
+        aria-label="Place an Order"
+      >
+        <div class="container">
+          <div class="section-title">
+            <h2>Place Your Order</h2>
+          </div>
+          <form
+            class="order-form"
+            id="orderForm"
+            aria-describedby="order-desc"
+            novalidate
+          >
+            <p id="order-desc">
+              Select your dishes, quantities, and add any special instructions.
+              Submit and your order will be sent to our WhatsApp for quick
+              processing.
+            </p>
+
+            <div id="orderItems">
+              <div class="order-item">
+                <div class="form-group">
+                  <label for="menuItem1">Menu Item</label>
+                  <div id="orderItems"></div>
+                  <button type="button" id="addFirstItemBtn" class="btn-add">
+                    + Add first item
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              id="addMoreBtn"
+              class="add-more-btn"
+              aria-label="Add another dish to order"
+            >
+              <i class="fas fa-plus"></i> Add another dish
+            </button>
+
+            <div class="form-group">
+              <label for="notes"
+                >Additional Instructions...Add your address for delivery
+                (optional)</label
+              >
+              <textarea
+                id="notes"
+                name="notes"
+                class="form-control"
+                placeholder="E.g. less spicy, gluten free..."
+              ></textarea>
+            </div>
+
+            <button
+              type="submit"
+              class="submit-btn"
+              aria-label="Submit your order"
+            >
+              Send Order via WhatsApp
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer role="contentinfo">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-column">
+            <h3>Mummachis Kitchen</h3>
+            <p>
+              Bringing authentic Nigerian flavors to your table, without making
+              you breaak your pocket. Our passion for traditional cuisine shines
+              in every dish we serve.
+            </p>
+            <div class="social-links">
+              <a href="#" class="social-link" aria-label="Facebook"
+                ><i class="fab fa-facebook-f"></i
+              ></a>
+              <a href="#" class="social-link" aria-label="Instagram"
+                ><i class="fab fa-instagram"></i
+              ></a>
+              <a href="#" class="social-link" aria-label="Twitter"
+                ><i class="fab fa-twitter"></i
+              ></a>
+            </div>
+          </div>
+          <div class="footer-column">
+            <h3>Contact Us</h3>
+            <p>
+              <i class="fas fa-map-marker-alt"></i> 15 Mokuolu Street, Ogba,
+              ikeja Lagos, Nigeria.
+            </p>
+            <p><i class="fas fa-phone"></i> +234 803 517 4263</p>
+            <p><i class="fas fa-envelope"></i> kelechinwankwo356@gmail.com</p>
+          </div>
+          <div class="footer-column">
+            <h3>Opening Hours</h3>
+            <p>Monday - Friday: 8am - 6pm</p>
+            <p>Saturday: 9am - 5pm</p>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          &copy;2025 Mummachis Kitchen. All rights reserved.
+        </div>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="menu.js"></script>
+  </body>
+</html>
