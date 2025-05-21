@@ -384,6 +384,20 @@
   }
 }
 
+@media (max-width: 480px) {
+  .hero-h1 {
+    font-size: 1.9rem !important;
+  }
+
+  .hero-p,
+  .cpad {
+    font-size: 0.9rem !important;
+  }
+  .chead {
+    font-size: 1.9rem !important;
+  }
+}
+
 .chead {
   margin-top: 5rem;
 }
