@@ -36,7 +36,7 @@ function createMenuCard({ name, description, price, image }) {
   return `
       <article class="menu-card" tabindex="0" aria-label="${name}">
         <div class="menu-card-img">
-          <img src="images/${image}" alt="${name}">
+          <img src="${image}" alt="${name}">
         </div>
         <div class="menu-card-content">
           <h3>${name}</h3>
