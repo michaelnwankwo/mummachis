@@ -15,11 +15,11 @@ function buildMenuOptions(selected = "") {
   return window.menuItems
     .map(
       ({ name, price }) => `
-    <option value="${name}" data-price="${price}" ${
+      <option value="${name}" data-price="${price}" ${
         name === selected ? "selected" : ""
       }>
-      ${name} – ₦${price.toLocaleString()}
-    </option>`
+        ${name} – ₦${price.toLocaleString()}
+      </option>`
     )
     .join("");
 }
@@ -53,9 +53,6 @@ function createOrderRow(dishName = "", quantity = 1, swallow = "") {
           swallow === "Fufu" ? "selected" : ""
         }>Fufu</option>
         <option value="Eba" ${swallow === "Eba" ? "selected" : ""}>Eba</option>
-        <option value="Amala" ${
-          swallow === "Amala" ? "selected" : ""
-        }>Amala</option>
         <option value="Semolina" ${
           swallow === "Semolina" ? "selected" : ""
         }>Semolina</option>
@@ -178,20 +175,16 @@ function addDishToOrder(dishName) {
   updateTotals();
   toggleButtons();
 
-  // ✅ Smooth scroll to order section with header offset
+  // ✅ Scroll to order section
   const orderSection = document.getElementById("order");
   if (orderSection) {
-    const headerOffset = 100;
-    const elementPosition = orderSection.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.scrollY - headerOffset;
-
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: "smooth",
-    });
+    const offset = 100;
+    const top =
+      orderSection.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: "smooth" });
   }
 
-  // ✅ Confirmation popup
+  // ✅ Toast notification
   const div = document.createElement("div");
   div.className = "add-to-cart-confirmation";
   div.textContent = `${dishName} added to order`;
@@ -201,8 +194,39 @@ function addDishToOrder(dishName) {
   div.addEventListener("transitionend", () => div.remove());
 }
 
-// Initialize on page load
+// === ✅ Mobile Nav Fix ===
 document.addEventListener("DOMContentLoaded", () => {
   createOrderRow();
   toggleButtons();
+
+  const hamburger = document.querySelector(".hamburger");
+  const navLinks = document.querySelector(".nav-links");
+  const header = document.querySelector("header");
+
+  // Mobile nav toggle
+  hamburger?.addEventListener("click", () => {
+    hamburger.classList.toggle("active");
+    navLinks.classList.toggle("active");
+    const icon = hamburger.querySelector("i");
+    icon.classList.toggle("fa-bars");
+    icon.classList.toggle("fa-times");
+  });
+
+  // Close nav on link click
+  navLinks?.addEventListener("click", (e) => {
+    if (e.target.tagName === "A") {
+      hamburger.classList.remove("active");
+      navLinks.classList.remove("active");
+      const icon = hamburger.querySelector("i");
+      icon.classList.add("fa-bars");
+      icon.classList.remove("fa-times");
+    }
+  });
+
+  // Sticky header scroll effect
+  window.addEventListener("scroll", () => {
+    if (header) {
+      header.classList.toggle("scrolled", window.scrollY > 50);
+    }
+  });
 });
