@@ -9,20 +9,16 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <link rel="icon" type="image/png" href="images/mumarest.png" />
   </head>
-  <link rel="icon" type="image/png" href="mumarest.png" />
   <body>
     <!-- Same header as index.html -->
     <header>
       <header>
         <div class="container">
           <nav class="navbar">
-            <a
-                href="index.html"
-                role="menuitem"
-                tabindex="0"
-                class="active"
-                ><div
+            <a href="index.html" role="menuitem" tabindex="0" class="active"
+              ><div
                 class="logo"
                 tabindex="0"
                 aria-label="Mummachis Restaurant Logo"
@@ -31,10 +27,10 @@
                   src="https://cradle2career.ng/wp-content/uploads/2025/05/tinywow_mummachis-correction-0_80621441.png"
                   alt="Mummachislogo"
                   class="Mummachislogo"
-                  
                 />
                 Mummachis<span>Kitchen</span>
-              </div></a>
+              </div></a
+            >
 
             <ul
               class="nav-links"
@@ -76,90 +72,67 @@
 
       <!-- Include the order section -->
       <section id="order" class="section">
-        <section
-          id="order"
-          class="section"
-          tabindex="0"
-          aria-label="Place an Order"
-        >
-          <div class="container">
-            <div class="section-title">
-              <h2>Place Your Order</h2>
-            </div>
-            <form
-              class="order-form"
-              id="orderForm"
-              aria-describedby="order-desc"
-              novalidate
-            >
-              <p id="order-desc">
-                Select your dishes, quantities, and add any special
-                instructions. Submit and your order will be sent to our WhatsApp
-                for quick processing.
-              </p>
+        <form id="orderForm" class="order-form" novalidate>
+          <div id="orderItems"></div>
 
-              <div id="orderItems">
-                <div class="order-item">
-                  <div class="form-group">
-                    <label for="menuItem1"></label>
-                    <div id="orderItems"></div>
-                    <button type="button" id="addFirstItemBtn" class="btn-add">
-                      + Add first item
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                id="addMoreBtn"
-                class="add-more-btn"
-                aria-label="Add another dish to order"
-              >
-                <i class="fas fa-plus"></i> Add another dish
-              </button>
-              <div class="form-group">
-                <label for="event-name">Name</label>
-                <input
-                  type="text"
-                  id="ordernam"
-                  class="form-control"
-                  required
-                  placeholder="E.g . Nwankwo michael"
-                />
-              </div>
-                <div class="form-group">
-              <label for="event-name">Your location</label>
-              <input
-                type="text"
-                id="orderlo"
-                class="form-control"
-                required
-                placeholder="123 mobolaji road, ikeja, Lagos. (with close landmarks)"
-              />
-            </div>
-              <div class="form-group">
-                <label for="notes"
-                  >Additional Instructions...Add your address for delivery
-                  (optional)</label
-                >
-                <textarea
-                  id="notes"
-                  name="notes"
-                  class="form-control"
-                  placeholder="E.g. less spicy, gluten free..."
-                ></textarea>
-              </div>
+          <button type="button" id="addFirstItemBtn" class="btn-add">
+            + Add first item
+          </button>
+          <button type="button" id="addMoreBtn" class="add-more-btn">
+            <i class="fas fa-plus"></i> Add another dish
+          </button>
 
-              <button
-                type="submit"
-                class="submit-btn"
-                aria-label="Submit your order"
-              >
-                Send Order via WhatsApp
-              </button>
-            </form>
+          <div class="form-group">
+            <label for="ordernam">Name</label>
+            <input
+              type="text"
+              id="ordernam"
+              class="form-control"
+              required
+              placeholder="e.g. Nwankwo Michael"
+            />
           </div>
-        </section>
+          <div class="form-group">
+            <label for="orderlo">Your location</label>
+            <input
+              type="text"
+              id="orderlo"
+              class="form-control"
+              required
+              placeholder="123 mobolaji road, ikeja, Lagos..."
+            />
+          </div>
+          <div class="form-group">
+            <label for="notes">Additional Instructions</label>
+            <textarea
+              id="notes"
+              name="notes"
+              class="form-control"
+              placeholder="e.g. less spicy, gluten free..."
+            ></textarea>
+          </div>
+
+          <div class="order-summary">
+            <div class="summary-row">
+              <span>Subtotal:</span>
+              <span id="subtotal" class="summary-value">₦0.00</span>
+            </div>
+            <div class="summary-row">
+              <span>Delivery Fee:</span>
+              <span id="deliveryFee" class="summary-value">₦500.00</span>
+            </div>
+            <div class="summary-row total-row">
+              <span>Total:</span>
+              <span id="totalAmount" class="summary-value text-primary"
+                >₦500.00</span
+              >
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">
+            Send Order via WhatsApp
+          </button>
+        </form>
       </section>
     </main>
 
@@ -171,9 +144,8 @@
             <div class="footer-column">
               <h3>Mummachis Kitchen</h3>
               <p>
-                Bringing authentic Nigerian flavors to your table, without
-                making you breaak your pocket. Our passion for traditional
-                cuisine shines in every dish we serve.
+                Bringing authentic Nigerian flavors to your table & making you
+                feel at home is our priority.
               </p>
               <div class="social-links">
                 <a href="#" class="social-link" aria-label="Facebook"
