@@ -102,7 +102,7 @@
 
 .form-group {
   flex: 1;
-  margin-bottom: 1rem;
+    margin-bottom: 1.5rem !important;
 }
 
 .form-group label {
@@ -532,4 +532,9 @@
   .hamburger {
     display: none; /* Hidden on desktop */
   }
+}
+
+#custom-price {
+  color: #ff7a18;
+  margin-bottom: 1rem;
 }
