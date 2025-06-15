@@ -534,7 +534,7 @@
   }
 }
 
-#custom-price {
+#custom-price,#total-price {
   color: #ff7a18;
   margin-bottom: 1rem;
 }
