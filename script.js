@@ -1,6 +1,10 @@
+"use strict";
+
+// Constants
 const MAX_ITEMS = 10;
 const DELIVERY_FEE = 500;
 
+// DOM Elements
 const orderItems = document.getElementById("orderItems");
 const orderForm = document.getElementById("orderForm");
 const addFirstItemBtn = document.getElementById("addFirstItemBtn");
@@ -11,6 +15,14 @@ const ordernaInput = document.getElementById("ordernam");
 const subtotalElement = document.getElementById("subtotal");
 const totalAmountElement = document.getElementById("totalAmount");
 
+// Initialize on DOM load
+document.addEventListener("DOMContentLoaded", () => {
+  createOrderRow();
+  toggleButtons();
+  setupMobileNav();
+});
+
+// Menu Utilities
 function buildMenuOptions(selected = "") {
   return window.menuItems
     .map(
@@ -24,9 +36,26 @@ function buildMenuOptions(selected = "") {
     .join("");
 }
 
+function getSwallowOptionsForSoup(soupName) {
+  const swallowMap = {
+    "Egusi Soup": ["Pounded Yam", "Eba", "Fufu"],
+    "Okra Soup": ["Amala", "Eba", "Fufu"],
+    "Oha Soup": ["Pounded Yam", "Fufu"],
+    "Banga Soup": ["Starch", "Fufu"],
+    "Afang Soup": ["Eba", "Fufu"],
+    "Ogbono Soup": ["Pounded Yam", "Eba"],
+    "Vegetable Soup": ["Eba", "Fufu"],
+  };
+  return (
+    swallowMap[soupName] || ["Pounded Yam", "Fufu", "Eba", "Semolina", "Wheat"]
+  );
+}
+
+// Order Item Management
 function createOrderRow(dishName = "", quantity = 1, swallow = "") {
   if (orderItems.children.length >= MAX_ITEMS) {
-    return alert(`You can order up to ${MAX_ITEMS} different dishes.`);
+    alert(`You can order up to ${MAX_ITEMS} different dishes.`);
+    return;
   }
 
   const row = document.createElement("div");
@@ -46,19 +75,14 @@ function createOrderRow(dishName = "", quantity = 1, swallow = "") {
     <div class="form-group">
       <select class="form-control swallow-select">
         <option value="">No swallow</option>
-        <option value="Pounded Yam" ${
-          swallow === "Pounded Yam" ? "selected" : ""
-        }>Pounded Yam</option>
-        <option value="Fufu" ${
-          swallow === "Fufu" ? "selected" : ""
-        }>Fufu</option>
-        <option value="Eba" ${swallow === "Eba" ? "selected" : ""}>Eba</option>
-        <option value="Semolina" ${
-          swallow === "Semolina" ? "selected" : ""
-        }>Semolina</option>
-        <option value="Wheat" ${
-          swallow === "Wheat" ? "selected" : ""
-        }>Wheat</option>
+        ${getSwallowOptionsForSoup(dishName)
+          .map(
+            (swallow) =>
+              `<option value="${swallow}" ${
+                swallow === swallow ? "selected" : ""
+              }>${swallow}</option>`
+          )
+          .join("")}
       </select>
     </div>
     <button type="button" class="remove-item">×</button>
@@ -70,22 +94,43 @@ function createOrderRow(dishName = "", quantity = 1, swallow = "") {
     toggleButtons();
   });
 
+  row.querySelector(".dish-select").addEventListener("change", (e) => {
+    updateSwallowSelect(e.target);
+    updateTotals();
+  });
+
   orderItems.appendChild(row);
   updateTotals();
   toggleButtons();
 }
 
+function updateSwallowSelect(selectEl) {
+  const dishName = selectEl.value;
+  const container = selectEl.closest(".order-item");
+  const swallowSelect = container.querySelector(".swallow-select");
+
+  if (dishName.toLowerCase().includes("soup")) {
+    const options = getSwallowOptionsForSoup(dishName)
+      .map((swallow) => `<option value="${swallow}">${swallow}</option>`)
+      .join("");
+    swallowSelect.innerHTML = `<option value="">No swallow</option>${options}`;
+    swallowSelect.disabled = false;
+  } else {
+    swallowSelect.innerHTML = `<option value="">No swallow</option>`;
+    swallowSelect.disabled = true;
+  }
+}
+
+// Calculation Functions
 function updateTotals() {
   const rows = orderItems.querySelectorAll(".order-item");
   let subtotal = 0;
 
   rows.forEach((row) => {
     const dish = row.querySelector(".dish-select").value;
-    const qty = parseInt(row.querySelector(".qty-input").value);
+    const qty = parseInt(row.querySelector(".qty-input").value) || 0;
     const menuItem = window.menuItems.find((item) => item.name === dish);
-    if (menuItem && qty > 0) {
-      subtotal += menuItem.price * qty;
-    }
+    if (menuItem) subtotal += menuItem.price * qty;
   });
 
   subtotalElement.textContent = `₦${subtotal.toLocaleString()}`;
@@ -100,18 +145,99 @@ function toggleButtons() {
   addMoreBtn.style.display = hasItems ? "inline-block" : "none";
 }
 
+// Event Handlers
+function handleAddToCartClick(e) {
+  const btn = e.target.closest(".add-to-cart");
+  if (!btn) return;
+
+  const card = btn.closest(".menu-card");
+  const dishName = card.querySelector("h3")?.textContent.trim();
+  if (dishName) addDishToOrder(dishName);
+}
+
+function addDishToOrder(dishName) {
+  const existing = [...orderItems.querySelectorAll(".order-item")].find(
+    (row) => {
+      return row.querySelector(".dish-select")?.value === dishName;
+    }
+  );
+
+  if (existing) {
+    const qtyInput = existing.querySelector(".qty-input");
+    qtyInput.value = +qtyInput.value + 1;
+  } else {
+    createOrderRow(dishName, 1);
+  }
+
+  updateTotals();
+  toggleButtons();
+  scrollToOrderSection();
+  showAddToCartToast(dishName);
+}
+
+function scrollToOrderSection() {
+  const orderSection = document.getElementById("order");
+  if (orderSection) {
+    const offset = 100;
+    const top =
+      orderSection.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: "smooth" });
+  }
+}
+
+function showAddToCartToast(dishName) {
+  const div = document.createElement("div");
+  div.className = "add-to-cart-confirmation";
+  div.textContent = `${dishName} added to order`;
+  document.body.appendChild(div);
+  requestAnimationFrame(() => div.classList.add("show"));
+  setTimeout(() => div.classList.remove("show"), 20000);
+  div.addEventListener("transitionend", () => div.remove());
+}
+
+function setupMobileNav() {
+  const hamburger = document.querySelector(".hamburger");
+  const navLinks = document.querySelector(".nav-links");
+  const header = document.querySelector("header");
+
+  hamburger?.addEventListener("click", () => {
+    hamburger.classList.toggle("active");
+    navLinks.classList.toggle("active");
+    const icon = hamburger.querySelector("i");
+    icon?.classList.toggle("fa-bars");
+    icon?.classList.toggle("fa-times");
+  });
+
+  navLinks?.addEventListener("click", (e) => {
+    if (e.target.tagName === "A") {
+      hamburger?.classList.remove("active");
+      navLinks?.classList.remove("active");
+      const icon = hamburger?.querySelector("i");
+      icon?.classList.add("fa-bars");
+      icon?.classList.remove("fa-times");
+    }
+  });
+
+  window.addEventListener("scroll", () => {
+    header?.classList.toggle("scrolled", window.scrollY > 50);
+  });
+}
+
+// Form Submission
 orderForm.addEventListener("submit", (e) => {
   e.preventDefault();
+  if (orderItems.children.length === 0) {
+    alert("Add at least one item to your order.");
+    return;
+  }
 
-  const rows = orderItems.querySelectorAll(".order-item");
-  if (rows.length === 0) return alert("Add at least one item to your order.");
-
+  let message =
+    "Hello Mummachis Kitchen! I would like to place an order:%0A%0A";
   let subtotal = 0;
-  let message = "Hello Mummachis Kitchen! I would like to place an order:%0A";
 
-  rows.forEach((row, i) => {
+  orderItems.querySelectorAll(".order-item").forEach((row, i) => {
     const dish = row.querySelector(".dish-select").value;
-    const qty = parseInt(row.querySelector(".qty-input").value);
+    const qty = parseInt(row.querySelector(".qty-input").value) || 0;
     const swallow = row.querySelector(".swallow-select").value;
     const menuItem = window.menuItems.find((item) => item.name === dish);
 
@@ -120,113 +246,29 @@ orderForm.addEventListener("submit", (e) => {
     const itemTotal = menuItem.price * qty;
     subtotal += itemTotal;
 
-    message += `%0A${i + 1}. ${dish} x${qty} – ₦${itemTotal.toLocaleString()}`;
+    message += `${i + 1}. ${dish} x${qty} – ₦${itemTotal.toLocaleString()}`;
     if (swallow) message += ` with ${swallow}`;
+    message += "%0A";
   });
 
-  message += `%0A%0ADelivery Fee: ₦${DELIVERY_FEE}`;
-  const total = subtotal + DELIVERY_FEE;
-  message += `%0A*Total: ₦${total.toLocaleString()}*`;
+  message += `%0ADelivery Fee: ₦${DELIVERY_FEE}`;
+  message += `%0A*Total: ₦${(subtotal + DELIVERY_FEE).toLocaleString()}*%0A`;
 
-  const name = ordernaInput.value.trim();
-  const location = orderloInput.value.trim();
-  const notes = notesInput.value.trim();
+  if (ordernaInput.value.trim())
+    message += `%0AName: ${encodeURIComponent(ordernaInput.value.trim())}`;
+  if (orderloInput.value.trim())
+    message += `%0ALocation: ${encodeURIComponent(orderloInput.value.trim())}`;
+  if (notesInput.value.trim())
+    message += `%0AInstructions: ${encodeURIComponent(
+      notesInput.value.trim()
+    )}`;
 
-  if (name) message += `%0AName: ${encodeURIComponent(name)}`;
-  if (location) message += `%0ALocation: ${encodeURIComponent(location)}`;
-  if (notes) message += `%0AInstructions: ${encodeURIComponent(notes)}`;
-
-  message += `%0A%0AThank you!`;
-
+  message += "%0A%0AThank you!";
   window.open(`https://wa.me/2348035174263?text=${message}`, "_blank");
 });
 
+// Event Listeners
 addFirstItemBtn.addEventListener("click", () => createOrderRow());
 addMoreBtn.addEventListener("click", () => createOrderRow());
-
-orderItems.addEventListener("change", updateTotals);
+document.addEventListener("click", handleAddToCartClick);
 orderItems.addEventListener("input", updateTotals);
-
-// === Menu Card Add‑to‑Order functionality ===
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest(".add-to-cart");
-  if (!btn) return;
-
-  const card = btn.closest(".menu-card");
-  const dishName = card.querySelector("h3")?.textContent.trim();
-  if (dishName) addDishToOrder(dishName);
-});
-
-function addDishToOrder(dishName) {
-  const existing = [...orderItems.querySelectorAll(".order-item")].find(
-    (row) => {
-      const select = row.querySelector(".dish-select");
-      return select?.value === dishName;
-    }
-  );
-
-  if (existing) {
-    const qtyInput = existing.querySelector("input.qty-input");
-    qtyInput.value = +qtyInput.value + 1;
-  } else {
-    createOrderRow(dishName, 1);
-  }
-
-  updateTotals();
-  toggleButtons();
-
-  // ✅ Scroll to order section
-  const orderSection = document.getElementById("order");
-  if (orderSection) {
-    const offset = 100;
-    const top =
-      orderSection.getBoundingClientRect().top + window.scrollY - offset;
-    window.scrollTo({ top, behavior: "smooth" });
-  }
-
-  // ✅ Toast notification
-  const div = document.createElement("div");
-  div.className = "add-to-cart-confirmation";
-  div.textContent = `${dishName} added to order`;
-  document.body.appendChild(div);
-  requestAnimationFrame(() => div.classList.add("show"));
-  setTimeout(() => div.classList.remove("show"), 2000);
-  div.addEventListener("transitionend", () => div.remove());
-}
-
-// === ✅ Mobile Nav Fix ===
-document.addEventListener("DOMContentLoaded", () => {
-  createOrderRow();
-  toggleButtons();
-
-  const hamburger = document.querySelector(".hamburger");
-  const navLinks = document.querySelector(".nav-links");
-  const header = document.querySelector("header");
-
-  // Mobile nav toggle
-  hamburger?.addEventListener("click", () => {
-    hamburger.classList.toggle("active");
-    navLinks.classList.toggle("active");
-    const icon = hamburger.querySelector("i");
-    icon.classList.toggle("fa-bars");
-    icon.classList.toggle("fa-times");
-  });
-
-  // Close nav on link click
-  navLinks?.addEventListener("click", (e) => {
-    if (e.target.tagName === "A") {
-      hamburger.classList.remove("active");
-      navLinks.classList.remove("active");
-      const icon = hamburger.querySelector("i");
-      icon.classList.add("fa-bars");
-      icon.classList.remove("fa-times");
-    }
-  });
-
-  // Sticky header scroll effect
-  window.addEventListener("scroll", () => {
-    if (header) {
-      header.classList.toggle("scrolled", window.scrollY > 50);
-    }
-  });
-});
