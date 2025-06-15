@@ -1,34 +1,12 @@
 "use strict";
 
-// === DOM Ready ===
-document.addEventListener("DOMContentLoaded", function () {
-  // Initialize components
-  initDatePickers();
-  generateTimeSlots();
-  populateTakeawayMenu();
-  bindTabSwitching();
-  bindFormSubmissions();
-  setupHamburgerMenu();
-});
-
-// === Initialize Date Pickers ===
-function initDatePickers() {
-  const commonOptions = {
-    minDate: "today",
-    dateFormat: "Y-m-d",
-    disable: [(date) => date.getDay() === 0],
-  };
-
-  flatpickr("#event-date", commonOptions);
-  flatpickr("#takeaway-date", commonOptions);
-}
-
-// === Generate Time Slots ===
-function generateTimeSlots() {
-  const container = document.getElementById("time-slots");
-  if (!container) return;
-
-  const staticSlots = [
+// ======================
+// CONSTANTS & CONFIG
+// ======================
+const CONFIG = {
+  maxItems: 10,
+  deliveryFee: 500,
+  timeSlots: [
     "10:00 AM",
     "10:30 AM",
     "11:00 AM",
@@ -48,25 +26,205 @@ function generateTimeSlots() {
     "6:00 PM",
     "6:30 PM",
     "7:00 PM",
-  ];
+  ],
+  portionMultipliers: {
+    small: 0.8,
+    regular: 1,
+    large: 2.5,
+    family: 6,
+  },
+  customizationPrices: {
+    "extra-protein": 1000,
+    "more-vegetables": 500,
+    "different-swallow": 800,
+    "extra-sauce": 500,
+  },
+};
 
-  container.innerHTML = staticSlots
-    .map((time) => `<div class="time-slot" data-time="${time}">${time}</div>`)
-    .join("");
+// ======================
+// DOM ELEMENTS
+// ======================
+const DOM = {
+  containers: {
+    takeawayItems: document.getElementById("takeaway-items-container"),
+    timeSlots: document.getElementById("time-slots"),
+    demandTimeSlots: document.getElementById("time-slots-demand"),
+  },
+  forms: {
+    event: document.getElementById("event-booking"),
+    takeaway: document.getElementById("takeaway-booking"),
+    onDemand: document.getElementById("on-demand-form"),
+  },
+  buttons: {
+    addItem: window.addTakeawayItem,
+  },
+};
 
-  container.querySelectorAll(".time-slot").forEach((slot) => {
-    slot.addEventListener("click", function () {
-      document
-        .querySelectorAll(".time-slot")
-        .forEach((s) => s.classList.remove("selected"));
-      this.classList.add("selected");
-      document.getElementById("takeaway-time").value = this.dataset.time;
-    });
-  });
+// ======================
+// INITIALIZATION
+// ======================
+document.addEventListener("DOMContentLoaded", function () {
+  initializeDatePickers();
+  initializeTimeSlots();
+  initializeMenuSystems();
+  setupEventHandlers();
+});
+
+function initializeDatePickers() {
+  const options = {
+    minDate: "today",
+    dateFormat: "Y-m-d",
+    disable: [(date) => date.getDay() === 0],
+  };
+
+  flatpickr("#event-date", options);
+  flatpickr("#takeaway-date", options);
+  flatpickr("#on-demand-date", options);
 }
 
-// === Menu & Swallow Pairing ===
-function getSwallowOptionsForSoup(soupName) {
+function initializeTimeSlots() {
+  generateTimeSlots("time-slots", "takeaway-time");
+  generateTimeSlots("time-slots-demand", "on-demand-time");
+}
+
+function initializeMenuSystems() {
+  if (window.menuItems) {
+    populateTakeawayMenu();
+    setupOnDemandMenu();
+  }
+}
+
+function setupEventHandlers() {
+  setupTabSwitching();
+  setupFormSubmissions();
+  setupHamburgerMenu();
+}
+
+// ======================
+// MENU SYSTEM FUNCTIONS
+// ======================
+function populateTakeawayMenu() {
+  if (!DOM.containers.takeawayItems) return;
+
+  const addMenuItem = () => {
+    if (DOM.containers.takeawayItems.children.length >= CONFIG.maxItems) {
+      alert(`Maximum ${CONFIG.maxItems} items allowed per order`);
+      return;
+    }
+
+    const itemHTML = `
+      <div class="order-item">
+        <select class="form-control dish-select" required>
+          <option value="">Select dish</option>
+          ${window.menuItems
+            .map(
+              (item) => `
+            <option value="${item.id}" data-price="${item.price}">
+              ${item.name} - ₦${item.price.toLocaleString()}
+            </option>
+          `
+            )
+            .join("")}
+        </select>
+        <select class="form-control swallow-select" disabled>
+          <option value="">Select swallow</option>
+        </select>
+        <input type="number" class="form-control qty-input" min="1" value="1" required>
+        <span class="item-subtotal">₦0</span>
+        <button type="button" class="remove-item">×</button>
+      </div>
+    `;
+
+    const itemElement = document.createElement("div");
+    itemElement.innerHTML = itemHTML;
+    DOM.containers.takeawayItems.appendChild(itemElement);
+
+    // Set up event listeners for the new item
+    const dishSelect = itemElement.querySelector(".dish-select");
+    const qtyInput = itemElement.querySelector(".qty-input");
+    const removeBtn = itemElement.querySelector(".remove-item");
+
+    dishSelect.addEventListener("change", function () {
+      updateSwallowOptions(this);
+      updateOrderTotals();
+    });
+
+    qtyInput.addEventListener("input", updateOrderTotals);
+    removeBtn.addEventListener("click", removeOrderItem);
+  };
+
+  // Add first item by default
+  if (DOM.containers.takeawayItems.children.length === 0) {
+    addMenuItem();
+  }
+
+  // Make add function globally available
+  window.addTakeawayItem = addMenuItem;
+}
+
+function setupOnDemandMenu() {
+  const container = document.getElementById("base-dish-container");
+  if (!container) return;
+
+  // Create select element
+  const selectHTML = `
+    <select id="base-dish" class="form-control" required>
+      <option value="" disabled selected>Select a base dish</option>
+      ${window.menuItems
+        .map(
+          (item) => `
+        <option value="${item.id}" data-price="${item.price}">
+          ${item.name} - ₦${item.price.toLocaleString()}
+        </option>
+      `
+        )
+        .join("")}
+    </select>
+  `;
+
+  // Insert the select element into the container
+  container.insertAdjacentHTML("beforeend", selectHTML);
+
+  // Set up event listeners
+  document
+    .getElementById("base-dish")
+    .addEventListener("change", updateOnDemandPrice);
+  document
+    .getElementById("portion-size")
+    .addEventListener("change", updateOnDemandPrice);
+  DOM.forms.onDemand
+    .querySelectorAll('input[name="custom"]')
+    .forEach((input) => {
+      input.addEventListener("change", updateOnDemandPrice);
+    });
+}
+
+// ======================
+// ORDER MANAGEMENT
+// ======================
+function updateSwallowOptions(selectElement) {
+  const container = selectElement.closest(".order-item");
+  const swallowSelect = container.querySelector(".swallow-select");
+  const selectedItem = window.menuItems.find(
+    (item) => item.id == selectElement.value
+  );
+
+  if (selectedItem?.name.toLowerCase().includes("soup")) {
+    const options = getSwallowOptions(selectedItem.name);
+    swallowSelect.innerHTML = `
+      <option value="">Select swallow</option>
+      ${options
+        .map((option) => `<option value="${option}">${option}</option>`)
+        .join("")}
+    `;
+    swallowSelect.disabled = false;
+  } else {
+    swallowSelect.innerHTML = '<option value="">N/A</option>';
+    swallowSelect.disabled = true;
+  }
+}
+
+function getSwallowOptions(dishName) {
   const swallowMap = {
     "Egusi Soup": ["Pounded Yam", "Eba", "Fufu"],
     "Okra Soup": ["Amala", "Eba", "Fufu"],
@@ -76,238 +234,287 @@ function getSwallowOptionsForSoup(soupName) {
     "Ogbono Soup": ["Pounded Yam", "Eba"],
     "Vegetable Soup": ["Eba", "Fufu"],
   };
-
-  return swallowMap[soupName] || ["Eba", "Fufu", "Pounded Yam", "semolina", "wheat"];
+  return (
+    swallowMap[dishName] || ["Pounded Yam", "Fufu", "Eba", "Semolina", "Wheat"]
+  );
 }
 
-// === Populate Takeaway Menu ===
-function populateTakeawayMenu() {
-  const container = document.getElementById("takeaway-items-container");
-  if (!container || !window.menuItems) return;
-
-  const addItem = () => {
-    const itemDiv = document.createElement("div");
-    itemDiv.className = "order-item new-item";
-
-    const options = window.menuItems
-      .map((item) => `<option value="${item.id}">${item.name}</option>`)
-      .join("");
-
-    itemDiv.innerHTML = `
-      <select class="form-control takeaway-item" onchange="updateSwallowSelect(this); updateSubtotal(this)" required>
-        <option value="">Select soup or food</option>
-        ${options}
-      </select>
-      <select class="form-control swallow-select" disabled>
-        <option value="">Select swallow</option>
-      </select>
-      <input type="number" class="form-control takeaway-qty" placeholder="Qty" min="1" value="1" onchange="updateSubtotal(this)" required>
-      <span class="item-subtotal">₦0</span>
-      <button type="button" class="remove-item" onclick="removeTakeawayItem(this)">
-        <i class="fas fa-times"></i>
-      </button>
-    `;
-
-    container.appendChild(itemDiv);
-  };
-
-  if (container.childElementCount === 0) addItem();
-  window.addTakeawayItem = addItem;
-}
-
-// === Update Swallow Options ===
-function updateSwallowSelect(selectEl) {
-  const item = window.menuItems.find((m) => m.id == selectEl.value);
-  const container = selectEl.closest(".order-item");
-  const swallowSelect = container.querySelector(".swallow-select");
-
-  if (item && item.name.toLowerCase().includes("soup")) {
-    const swallows = getSwallowOptionsForSoup(item.name);
-    swallowSelect.innerHTML = swallows
-      .map((swallow) => `<option value="${swallow}">${swallow}</option>`)
-      .join("");
-    swallowSelect.disabled = false;
-  } else {
-    swallowSelect.innerHTML = `<option value="">N/A</option>`;
-    swallowSelect.disabled = true;
-  }
-}
-
-// === Update Subtotal ===
-function updateSubtotal(input) {
-  const item = input.closest(".order-item");
-  const select = item.querySelector(".takeaway-item");
-  const qty = parseInt(item.querySelector(".takeaway-qty").value, 10) || 0;
-  const subtotalEl = item.querySelector(".item-subtotal");
-
-  const menuItem = window.menuItems.find((m) => m.id == select.value);
-  const subtotal = menuItem ? menuItem.price * qty : 0;
-
-  subtotalEl.textContent = `₦${subtotal.toLocaleString()}`;
-  updateTakeawayTotal();
-}
-
-// === Update Total ===
-function updateTakeawayTotal() {
-  let total = 0;
-  document.querySelectorAll(".order-item").forEach((item) => {
-    const select = item.querySelector(".takeaway-item");
-    const qty = parseInt(item.querySelector(".takeaway-qty").value, 10) || 0;
-    const menuItem = window.menuItems.find((m) => m.id == select.value);
-    if (menuItem) total += menuItem.price * qty;
-  });
-
-  total += 500; // Delivery fee
-  const totalField = document.getElementById("total-price");
-  if (totalField) {
-    totalField.textContent = `Total (incl. ₦500 delivery): ₦${total.toLocaleString()}`;
-  }
-}
-
-// === Remove Item ===
-function removeTakeawayItem(button) {
-  const item = button.closest(".order-item");
-  if (item) {
-    item.remove();
-    updateTakeawayTotal();
-  }
-}
-
-// === Tab Switching ===
-function bindTabSwitching() {
-  document.querySelectorAll(".tab-btn").forEach((btn) => {
-    btn.addEventListener("click", function () {
-      document
-        .querySelectorAll(".tab-btn")
-        .forEach((b) => b.classList.remove("active"));
-      document
-        .querySelectorAll(".tab-content")
-        .forEach((c) => c.classList.remove("active"));
-      this.classList.add("active");
-      const tab = document.getElementById(this.dataset.tab);
-      if (tab) tab.classList.add("active");
-    });
-  });
-}
-
-// === Form Submission Bindings ===
-function bindFormSubmissions() {
-  document
-    .getElementById("event-booking")
-    ?.addEventListener("submit", function (e) {
-      e.preventDefault();
-      sendEventToWhatsApp();
-    });
-
-  document
-    .getElementById("takeaway-booking")
-    ?.addEventListener("submit", function (e) {
-      e.preventDefault();
-      sendTakeawayToWhatsApp();
-    });
-}
-
-// === Send Event Booking to WhatsApp ===
-function sendEventToWhatsApp() {
-  const name = document.getElementById("event-name")?.value || "Not provided";
-  const date = document.getElementById("event-date")?.value || "Not selected";
-  const details = document.getElementById("event-notes")?.value || "No details";
-  const times =
-    document.getElementById("event-time")?.value || "Time not selected";
-  const guests =
-    document.getElementById("event-guests")?.value || "Not specified";
-
-  const msg = `📅 *Event Booking*\n\n👤 Name: ${name}\n📆 Date: ${date}\n🕒 Time: ${times}\n👥 Guests: ${guests}\n📝 Details: ${details}`;
-  const url = `https://wa.me/2348035174263?text=${encodeURIComponent(msg)}`;
-  window.open(url, "_blank");
-}
-
-// === Send Takeaway Order to WhatsApp ===
-function sendTakeawayToWhatsApp() {
-  const name = document.getElementById("takeaway-name").value.trim();
-  const phone = document.getElementById("takeaway-phone").value.trim();
-  const date = document.getElementById("takeaway-date").value.trim();
-  const time = document.getElementById("takeaway-time").value.trim();
-  const notes = document.getElementById("takeaway-notes").value.trim();
-
-  if (!name || !phone || !date || !time) {
-    alert("Please fill all required fields.");
-    return;
-  }
-
-  const items = [];
-  let total = 0;
+function updateOrderTotals() {
+  let subtotal = 0;
 
   document.querySelectorAll(".order-item").forEach((item) => {
-    const id = parseInt(item.querySelector(".takeaway-item").value, 10);
-    const qty = parseInt(item.querySelector(".takeaway-qty").value, 10);
-    const swallow = item.querySelector(".swallow-select").value;
-    const menuItem = window.menuItems.find((m) => m.id === id);
+    const dishId = item.querySelector(".dish-select").value;
+    const quantity = parseInt(item.querySelector(".qty-input").value) || 0;
+    const dish = window.menuItems.find((item) => item.id == dishId);
 
-    if (menuItem && qty > 0) {
-      const price = menuItem.price * qty;
-      total += price;
-
-      const swallowText =
-        menuItem.name.toLowerCase().includes("soup") && swallow
-          ? ` with ${swallow}`
-          : "";
-      items.push(
-        `${menuItem.name}${swallowText} x${qty} — ₦${price.toLocaleString()}`
-      );
+    if (dish) {
+      const itemTotal = dish.price * quantity;
+      subtotal += itemTotal;
+      item.querySelector(
+        ".item-subtotal"
+      ).textContent = `₦${itemTotal.toLocaleString()}`;
     }
   });
 
-  if (items.length === 0) {
-    alert("Please add at least one item.");
-    return;
-  }
-
-  total += 500; // Add delivery fee
-
-  const message = `🛍️ *Takeaway Order from ${name}*
-📱 Phone: ${phone}
-📅 Pickup Date: ${date}
-🕒 Pickup Time: ${time}
-🧾 Order:
-${items.map((item, i) => `${i + 1}. ${item}`).join("\n")}
-🚚 Delivery Fee: ₦500
-💵 Total: ₦${total.toLocaleString()}
-📝 Notes: ${notes || "None"}
-`;
-
-  const url = `https://wa.me/2348035174263?text=${encodeURIComponent(message)}`;
-  window.open(url, "_blank");
+  const total = subtotal + CONFIG.deliveryFee;
+  document.getElementById(
+    "total-price"
+  ).textContent = `Total (incl. ₦${CONFIG.deliveryFee.toLocaleString()} delivery): ₦${total.toLocaleString()}`;
 }
 
-// === Hamburger Menu ===
-function setupHamburgerMenu() {
-  const hamburger = document.querySelector(".hamburger");
-  const navLinks = document.getElementById("navlinks");
+function removeOrderItem() {
+  this.closest(".order-item")?.remove();
+  updateOrderTotals();
+}
 
-  if (hamburger && navLinks) {
-    hamburger.addEventListener("click", function () {
-      hamburger.classList.toggle("active");
-      navLinks.classList.toggle("active");
+function updateOnDemandPrice() {
+  const baseDish = document.getElementById("base-dish");
+  const basePrice = parseFloat(baseDish.selectedOptions[0]?.dataset.price) || 0;
+  const portionSize = document.getElementById("portion-size").value;
+  const customOptions = Array.from(
+    document.querySelectorAll('input[name="custom"]:checked')
+  ).map((checkbox) => checkbox.value);
 
-      const icon = hamburger.querySelector("i");
-      if (icon) {
-        icon.classList.toggle("fa-bars");
-        icon.classList.toggle("fa-times");
-      }
-    });
+  let price = basePrice * (CONFIG.portionMultipliers[portionSize] || 1);
+  price += customOptions.reduce(
+    (sum, option) => sum + (CONFIG.customizationPrices[option] || 0),
+    0
+  );
 
-    navLinks.addEventListener("click", function (e) {
-      if (e.target.tagName === "A") {
-        hamburger.classList.remove("active");
-        navLinks.classList.remove("active");
+  document.getElementById(
+    "custom-price"
+  ).textContent = `Estimated Price: ₦${price.toLocaleString()}`;
+}
 
-        const icon = hamburger.querySelector("i");
-        if (icon) {
-          icon.classList.add("fa-bars");
-          icon.classList.remove("fa-times");
+// ======================
+// FORM HANDLING
+// ======================
+// ======================
+// TAB SWITCHING SYSTEM
+// ======================
+function setupTabSwitching() {
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  const tabContents = document.querySelectorAll(".tab-content");
+
+  // Initialize first tab as active if none are active
+  if (!document.querySelector(".tab-btn.active")) {
+    tabButtons[0]?.classList.add("active");
+    tabContents[0]?.classList.add("active");
+  }
+
+  tabButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      // Remove active class from all buttons and tabs
+      tabButtons.forEach((btn) => btn.classList.remove("active"));
+      tabContents.forEach((content) => content.classList.remove("active"));
+
+      // Add active class to clicked button and corresponding tab
+      this.classList.add("active");
+      const tabId = this.getAttribute("data-tab");
+      document.getElementById(tabId)?.classList.add("active");
+
+      // Special initialization for time slots in on-demand
+      if (tabId === "on-demand") {
+        const timeSlotsContainer = document.getElementById("time-slots-demand");
+        if (timeSlotsContainer && timeSlotsContainer.children.length === 0) {
+          generateTimeSlots("time-slots-demand", "on-demand-time");
         }
       }
     });
+  });
+}
+
+// Call this in your DOMContentLoaded event
+document.addEventListener("DOMContentLoaded", function () {
+  setupTabSwitching();
+  // ... other initializations
+});
+
+function setupFormSubmissions() {
+  // Event booking form
+  DOM.forms.event?.addEventListener("submit", function (e) {
+    e.preventDefault();
+    submitEventBooking();
+  });
+
+  // Takeaway order form
+  DOM.forms.takeaway?.addEventListener("submit", function (e) {
+    e.preventDefault();
+    submitTakeawayOrder();
+  });
+
+  // On-demand cooking form
+  DOM.forms.onDemand?.addEventListener("submit", function (e) {
+    e.preventDefault();
+    submitOnDemandRequest();
+  });
+}
+
+function submitEventBooking() {
+  const formData = {
+    name: document.getElementById("event-name").value.trim(),
+    email: document.getElementById("event-email").value.trim(),
+    phone: document.getElementById("event-phone").value.trim(),
+    guests: document.getElementById("event-guests").value.trim(),
+    date: document.getElementById("event-date").value.trim(),
+    time: document.getElementById("event-time").value.trim(),
+    details: document.getElementById("event-notes").value.trim(),
+  };
+
+  if (!validateRequiredFields(formData)) {
+    alert("Please fill all required fields");
+    return;
   }
+
+  const message = `📅 *Event Booking Request*\n\n
+👤 Name: ${formData.name}
+📧 Email: ${formData.email}
+📞 Phone: ${formData.phone}
+👥 Guests: ${formData.guests}
+📆 Date: ${formData.date}
+🕒 Time: ${formData.time}
+📝 Details: ${formData.details || "None"}`;
+
+  sendWhatsAppMessage(message);
+}
+
+function submitTakeawayOrder() {
+  const formData = {
+    name: document.getElementById("takeaway-name").value.trim(),
+    phone: document.getElementById("takeaway-phone").value.trim(),
+    date: document.getElementById("takeaway-date").value.trim(),
+    time: document.getElementById("takeaway-time").value.trim(),
+    notes: document.getElementById("takeaway-notes").value.trim(),
+    items: [],
+  };
+
+  // Collect order items
+  document.querySelectorAll(".order-item").forEach((item, index) => {
+    const dishId = item.querySelector(".dish-select").value;
+    const quantity = item.querySelector(".qty-input").value;
+    const swallow = item.querySelector(".swallow-select").value;
+    const dish = window.menuItems.find((item) => item.id == dishId);
+
+    if (dish && quantity > 0) {
+      formData.items.push({
+        name: dish.name,
+        quantity: quantity,
+        swallow: swallow,
+        price: dish.price * quantity,
+      });
+    }
+  });
+
+  if (!validateRequiredFields(formData) || formData.items.length === 0) {
+    alert("Please fill all required fields and add at least one item");
+    return;
+  }
+
+  const itemsText = formData.items
+    .map(
+      (item, index) =>
+        `${index + 1}. ${item.name} x${item.quantity}${
+          item.swallow ? ` with ${item.swallow}` : ""
+        } - ₦${item.price.toLocaleString()}`
+    )
+    .join("\n");
+
+  const message = `🛍️ *Takeaway Order*\n\n
+📞 Phone: ${formData.phone}
+📅 Pickup Date: ${formData.date}
+🕒 Pickup Time: ${formData.time}
+
+🧾 Order Items:
+${itemsText}
+
+🚚 Delivery Fee: ₦${CONFIG.deliveryFee.toLocaleString()}
+💵 Total: ₦${
+    formData.items.reduce((sum, item) => sum + item.price, 0) +
+    CONFIG.deliveryFee
+  }
+
+📝 Notes: ${formData.notes || "None"}`;
+
+  sendWhatsAppMessage(message);
+}
+
+function submitOnDemandRequest() {
+  const formData = {
+    name: document.getElementById("on-demand-name").value.trim(),
+    phone: document.getElementById("on-demand-phone").value.trim(),
+    date: document.getElementById("on-demand-date").value.trim(),
+    time: document.getElementById("on-demand-time").value.trim(),
+    baseDish: document.getElementById("base-dish").value,
+    portionSize: document.getElementById("portion-size").value,
+    customizations: Array.from(
+      document.querySelectorAll('input[name="custom"]:checked')
+    ).map((checkbox) => checkbox.value),
+    notes: document.getElementById("on-demand-notes").value.trim(),
+    estimatedPrice: document.getElementById("custom-price").textContent,
+  };
+
+  if (!validateRequiredFields(formData)) {
+    alert("Please fill all required fields");
+    return;
+  }
+
+  const baseDish = window.menuItems.find(
+    (item) => item.id == formData.baseDish
+  );
+  const customizationsText =
+    formData.customizations.length > 0
+      ? `✏️ Customizations: ${formData.customizations.join(", ")}\n`
+      : "";
+
+  const message = `🍳 *Custom Meal Request*\n\n
+📞 Phone: ${formData.phone}
+📅 Preferred Date: ${formData.date}
+🕒 Preferred Time: ${formData.time}
+
+🍽️ Base Dish: ${baseDish.name} (₦${baseDish.price.toLocaleString()})
+📏 Portion Size: ${formData.portionSize.toUpperCase()}
+${customizationsText}
+📝 Special Requests: ${formData.notes || "None"}
+
+${formData.estimatedPrice}`;
+
+  sendWhatsAppMessage(message);
+}
+
+// ======================
+// UTILITY FUNCTIONS
+// ======================
+function generateTimeSlots(containerId, timeInputId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = CONFIG.timeSlots
+    .map(
+      (time) => `
+    <div class="time-slot" data-time="${time}">${time}</div>
+  `
+    )
+    .join("");
+
+  container.querySelectorAll(".time-slot").forEach((slot) => {
+    slot.addEventListener("click", function () {
+      container
+        .querySelectorAll(".time-slot")
+        .forEach((s) => s.classList.remove("selected"));
+      this.classList.add("selected");
+      document.getElementById(timeInputId).value = this.dataset.time;
+    });
+  });
+}
+
+function validateRequiredFields(fields) {
+  return Object.values(fields).every(
+    (value) =>
+      value !== undefined && value !== null && value.toString().trim() !== ""
+  );
+}
+
+function sendWhatsAppMessage(text) {
+  const url = `https://wa.me/2348035174263?text=${encodeURIComponent(text)}`;
+  window.open(url, "_blank");
 }
