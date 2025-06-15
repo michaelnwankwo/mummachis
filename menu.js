@@ -88,7 +88,7 @@ window.menuItems = [
     description: "Fluffy rice meets lush, savory vegetable sauce.",
     price: 2000,
     image: "riceveg.png",
-    featured: true,
+    featured: false,
   },
   {
     id: 12,
@@ -96,7 +96,7 @@ window.menuItems = [
     description: "Smoky, spicy jollof rice with juicy beef cuts.",
     price: 2000,
     image: "jollof.png",
-    featured: false,
+    featured: true,
   },
 ];
 
