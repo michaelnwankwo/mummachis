@@ -84,7 +84,7 @@ window.menuItems = [
   },
   {
     id: 11,
-    name: "Rice / vegetable soup",
+    name: "Rice / vegetable ",
     description: "Fluffy rice meets lush, savory vegetable sauce.",
     price: 2000,
     image: "riceveg.png",
