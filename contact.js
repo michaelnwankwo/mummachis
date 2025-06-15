@@ -68,6 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initializeTimeSlots();
   initializeMenuSystems();
   setupEventHandlers();
+  enhanceMobileSelects();
 });
 
 function initializeDatePickers() {
@@ -129,9 +130,11 @@ function populateTakeawayMenu() {
         <select class="form-control swallow-select" disabled>
           <option value="">Select swallow</option>
         </select>
-        <input type="number" class="form-control qty-input" min="1" value="1" required>
-        <span class="item-subtotal">₦0</span>
-        <button type="button" class="remove-item">×</button>
+        <div class="order-item-actions">
+          <input type="number" class="form-control qty-input" min="1" value="1" required>
+          <span class="item-subtotal">₦0</span>
+          <button type="button" class="remove-item">×</button>
+        </div>
       </div>
     `;
 
@@ -517,4 +520,20 @@ function validateRequiredFields(fields) {
 function sendWhatsAppMessage(text) {
   const url = `https://wa.me/2348035174263?text=${encodeURIComponent(text)}`;
   window.open(url, "_blank");
+}
+
+// Improve mobile select menus
+function enhanceMobileSelects() {
+  if ("maxTouchPoints" in navigator && navigator.maxTouchPoints > 0) {
+    document
+      .querySelectorAll(".dish-select, .swallow-select")
+      .forEach((select) => {
+        select.addEventListener("focus", function () {
+          this.style.fontSize = "16px"; // Ensure readable size when opened
+        });
+        select.addEventListener("blur", function () {
+          this.style.fontSize = ""; // Reset when closed
+        });
+      });
+  }
 }
