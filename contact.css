@@ -424,3 +424,10 @@
   font-size: 1.2rem;
   cursor: pointer;
 }
+
+.total-price {
+  font-weight: 500;
+  font-size: 1.02rem;
+  color: #ff7a18; /* warm orange fire */
+  margin-bottom: 1rem;
+}
