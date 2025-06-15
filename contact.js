@@ -77,7 +77,7 @@ function getSwallowOptionsForSoup(soupName) {
     "Vegetable Soup": ["Eba", "Fufu"],
   };
 
-  return swallowMap[soupName] || ["Eba", "Fufu", "Pounded Yam"];
+  return swallowMap[soupName] || ["Eba", "Fufu", "Pounded Yam", "semolina", "wheat"];
 }
 
 // === Populate Takeaway Menu ===
