@@ -27,10 +27,9 @@
 .hero-p {
   font-size: 1.3rem;
   margin-bottom: 1rem;
-  font-weight: 300;
+  font-weight: 500;
   opacity: 0.9;
   animation-delay: 0.4s;
-  font-weight: 500;
   color: #fff;
 }
 
@@ -200,9 +199,11 @@
 .info-card:nth-child(1) {
   animation: slideUp 0.8s ease-out 0.8s forwards;
 }
+
 .info-card:nth-child(2) {
   animation: slideUp 0.8s ease-out 1s forwards;
 }
+
 .info-card:nth-child(3) {
   animation: slideUp 0.8s ease-out 1.2s forwards;
 }
@@ -239,7 +240,6 @@
   color: var(--primary-dark);
 }
 
-/* Calendar styling */
 .flatpickr-calendar {
   box-shadow: var(--shadow-lg);
   border-radius: var(--border-radius);
@@ -250,7 +250,6 @@
   border-color: var(--primary);
 }
 
-/* Time slot selection */
 .time-slots {
   display: flex;
   flex-wrap: wrap;
@@ -280,7 +279,6 @@
   opacity: 0.6;
 }
 
-/* Confirmation animation */
 .confirmation-message {
   position: fixed;
   top: 50%;
@@ -359,6 +357,43 @@
   .booking-form {
     padding: 2rem;
   }
+
+  .hamburger {
+    display: block;
+  }
+
+  .navlinks {
+    position: fixed;
+    top: 80px;
+    left: -100%;
+    width: 100%;
+    height: calc(100vh - 80px);
+    background: var(--card-bg);
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px 0;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: none;
+  }
+
+  .navlinks.active {
+    left: 0;
+  }
+
+  .navlinks li {
+    margin: 15px 0;
+    width: 100%;
+    text-align: center;
+    display: none;
+  }
+
+  .navlinks li a {
+    display: block;
+    padding: 10px 0;
+    width: 100%;
+  }
 }
 
 @media (max-width: 576px) {
@@ -382,6 +417,9 @@
   .info-card {
     padding: 1.5rem;
   }
+  .navlinks {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {
@@ -393,8 +431,12 @@
   .cpad {
     font-size: 0.9rem !important;
   }
+
   .chead {
     font-size: 1.9rem !important;
+  }
+  .navlinks {
+    display: none;
   }
 }
 
@@ -412,17 +454,36 @@
   margin-bottom: 10px;
   align-items: center;
 }
+
 .item-select,
 .item-quantity {
   flex: 1;
   padding: 8px;
 }
+
 .remove-item {
   background: none;
   border: none;
   color: red;
   font-size: 1.2rem;
   cursor: pointer;
+}
+
+.hamburger {
+  display: none;
+  cursor: pointer;
+  font-size: 1.8rem;
+  color: var(--dark);
+  z-index: 1001;
+  flex-direction: column;
+  align-items: center;
+  font-size: 14px;
+  color: #333;
+}
+
+.navlinks {
+  display: flex;
+  transition: all 0.3s ease;
 }
 
 .total-price {
