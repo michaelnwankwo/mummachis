@@ -9,79 +9,65 @@
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
         />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
         />
         <link rel="stylesheet" href="contact.css" />
         <link rel="stylesheet" href="style.css" />
-          <link rel="icon" type="image/png" href="mumarest.png" />
+        <link rel="icon" type="image/png" href="images/mumarest.png" />
       </head>
       <body>
         <header>
           <div class="container">
             <nav class="navbar">
-              <a
-                href="index.html"
-                role="menuitem"
-                tabindex="0"
-                class="active"
-                ><div
-                class="logo"
-                tabindex="0"
-                aria-label="Mummachis Restaurant Logo"
-              >
-                <img
-                  src="https://cradle2career.ng/wp-content/uploads/2025/05/tinywow_mummachis-correction-0_80621441.png"
-                  alt="Mummachislogo"
-                  class="Mummachislogo"
-                  
-                />
-                Mummachis<span>Kitchen</span>
-              </div></a>
-              
-              <ul
-                class="nav-links"
-                id="nav-links"
-                role="menubar"
-                aria-label="Primary navigation"
-              >
+              <a href="index.html" role="menuitem" tabindex="0" class="active">
+                <div class="logo" tabindex="0" aria-label="Mummachis Restaurant Logo">
+                  <img
+                    src="https://cradle2career.ng/wp-content/uploads/2025/05/tinywow_mummachis-correction-0_80621441.png"
+                    alt="Mummachislogo"
+                    class="Mummachislogo"
+                  />
+                  Mummachis<span>Kitchen</span>
+                </div>
+              </a>
+        
+              <ul class="navlinks" id="navlinks" role="menubar" aria-label="Primary navigation">
                 <li role="none">
-                  <a href="index.html" role="menuitem" tabindex="0" class="active"
-                  >Home</a
-                >
+                  <a href="index.html" role="menuitem" tabindex="0" class="active">Home</a>
                 </li>
                 <li role="none">
                   <a href="menu.html" role="menuitem" tabindex="0">Menu</a>
                 </li>
-                  <li role="none">
-                  <a href="index.html#order" role="menuitem" tabindex="0"
-                    >Order</a
-                  >
-                </li>
                 <li role="none">
-                  <a href="contact.html" role="menuitem" tabindex="0"
-                    >Services</a
-                  >
+                  <a href="contact.html" role="menuitem" tabindex="0">Services</a>
                 </li>
               </ul>
-              <div class="hamburger"><a href="index.html" role="menuitem" tabindex="0" class="active"> <i class="fa-solid fa-house"></i></a></div>
+        
+              <div class="hamburger" id="hamburger">
+               <a href="index.html" role="menuitem" tabindex="0" class="active"> <i class="fa-solid fa-house"></i></a>
+              </div>
             </nav>
           </div>
         </header>
+        
+        
 
         <main>
           <section class="contact-hero">
             <div class="container">
               <h1 class="chead">Contact & Bookings</h1>
-               <p class="hero-p  cpad">
+              <p class="hero-p  cpad">
             book your takeaway, delivery or event hosting with us
               </p>
               <div class="booking-tabs">
-                <button class="tab-btn active" data-tab="events">
-                  Outdoor Events
-                </button>
-                <button class="tab-btn" data-tab="takeaway">Takeaway</button>
+                <div class="tab-buttons">
+                  <button class="tab-btn" data-tab="events">Event Booking</button>
+                  <button class="tab-btn" data-tab="takeaway">Takeaway</button>
+                  <button class="tab-btn" data-tab="on-demand">On-Demand</button>
+                </div>
               </div>
             </div>
           </section>
@@ -248,6 +234,100 @@
                   </button>
                 </form>
               </div>
+
+              <div id="on-demand" class="tab-content">
+                  <form id="on-demand-form" class="booking-form">
+                    <h2 class="section-title">On-Demand Cooking</h2>
+                    <p class="section-subtitle">Customize our dishes to your exact preferences!</p>
+              
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="on-demand-name">Your Name</label>
+                        <input
+                          type="text"
+                          id="on-demand-name"
+                          class="form-control"
+                          required
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="on-demand-phone">Phone Number</label>
+                        <input
+                          type="tel"
+                          id="on-demand-phone"
+                          class="form-control"
+                          required
+                        />
+                      </div>
+                    </div>
+              
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="on-demand-date">Preferred Date</label>
+                        <input
+                          type="text"
+                          id="on-demand-date"
+                          class="form-control"
+                          placeholder="Select date"
+                          required
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="on-demand-time">Preferred Time</label>
+                        <input
+                          type="hidden"
+                          id="on-demand-time"
+                          name="on-demand-time"
+                          required
+                        />
+                        <div class="time-slots" id="time-slots-demand">
+                          <!-- Time slots will be generated by JavaScript -->
+                        </div>
+                      </div>
+                    </div>
+              
+                    <div class="form-group" id="base-dish-container">
+                      <label for="base-dish">Base Dish (Select one to customize)</label>
+                      <!-- JavaScript will add the select element here -->
+                    </div>
+
+                    <div class="form-group">
+                      <label for="portion-size">Portion Size</label>
+                      <select id="portion-size" class="form-control" required>
+                        <option value="" disabled selected>Select portion size</option>
+                        <option value="regular" selected>Regular (Standard Size)</option>
+                        <option value="large">Large (3-4 Plates)</option>
+                        <option value="family">Family Size (7+ Plates)</option>
+                      </select>
+                    </div>
+              
+                    <div class="form-group">
+                      <label>Customization Options</label>
+                      <div class="custom-options">
+                        <label><input type="checkbox" name="custom" value="extra-protein"> Extra Protein (+₦1000)</label>
+                        <label><input type="checkbox" name="custom" value="less-spicy"> Less Spicy</label>
+                        <label><input type="checkbox" name="custom" value="more-veggies"> More Vegetables</label>
+                        <label><input type="checkbox" name="custom" value="different-swallow"> Goat meat(+₦800)</label>
+                        <label><input type="checkbox" name="custom" value="extra-sauce"> Delivery (+₦500)</label>
+                      </div>
+                    </div>
+              
+                    <div id="custom-price" class="total-price">Estimated Price: ₦0</div>
+              
+                    <div class="form-group">
+                      <label for="on-demand-notes">Special Instructions</label>
+                      <textarea
+                        id="on-demand-notes"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Example: 'Make it extra spicy with double fish, serve with semolina instead'"
+                      ></textarea>
+                    </div>
+              
+                    <button type="submit" class="submit-btn">Request Custom Meal</button>
+                  </form>
+                
+              </div>
             </div>
           </section>
 
@@ -322,6 +402,6 @@
     <!-- --JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="contact.js"></script>
-    <script src="menu.js"></script>
+    <script src="menu.js"></script>\
   </body>
 </html>
