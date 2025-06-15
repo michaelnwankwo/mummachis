@@ -453,10 +453,10 @@ function submitOnDemandRequest() {
     estimatedPrice: document.getElementById("custom-price").textContent,
   };
 
-  if (!validateRequiredFields(formData)) {
-    alert("Please fill all required fields");
-    return;
-  }
+  // if (!validateRequiredFields(formData)) {
+  //   alert("Please fill all required fields");
+  //   return;
+  // }
 
   const baseDish = window.menuItems.find(
     (item) => item.id == formData.baseDish
