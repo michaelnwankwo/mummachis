@@ -3,6 +3,18 @@
 // Constants
 const MAX_ITEMS = 10;
 const DELIVERY_FEE = 500;
+const NON_SWALLOW_DISHES = [
+  "rice",
+  "jollof rice",
+  "fried rice",
+  "ofada rice",
+  "beans",
+  "moi moi",
+  "salad",
+  "plantain",
+  "yam",
+  "Rice / banga stew (ofe akwu)",
+];
 
 // DOM Elements
 const orderItems = document.getElementById("orderItems");
@@ -51,8 +63,16 @@ function getSwallowOptionsForSoup(soupName) {
   );
 }
 
+function isSoupDish(dishName) {
+  const lowerDish = dishName.toLowerCase();
+  return (
+    lowerDish.includes("soup") &&
+    !NON_SWALLOW_DISHES.some((dish) => lowerDish.includes(dish.toLowerCase()))
+  );
+}
+
 // Order Item Management
-function createOrderRow(dishName = "", quantity = 1, swallow = "") {
+function createOrderRow(dishName = "", quantity = 1) {
   if (orderItems.children.length >= MAX_ITEMS) {
     alert(`You can order up to ${MAX_ITEMS} different dishes.`);
     return;
@@ -60,6 +80,8 @@ function createOrderRow(dishName = "", quantity = 1, swallow = "") {
 
   const row = document.createElement("div");
   row.className = "order-item";
+  const showSwallow = isSoupDish(dishName);
+
   row.innerHTML = `
     <div class="form-group">
       <select class="form-control dish-select" required>
@@ -73,16 +95,19 @@ function createOrderRow(dishName = "", quantity = 1, swallow = "") {
       <input type="number" class="form-control qty-input" min="1" value="${quantity}" required />
     </div>
     <div class="form-group">
-      <select class="form-control swallow-select">
+      <select class="form-control swallow-select" ${
+        showSwallow ? "" : "disabled"
+      }>
         <option value="">No swallow</option>
-        ${getSwallowOptionsForSoup(dishName)
-          .map(
-            (swallow) =>
-              `<option value="${swallow}" ${
-                swallow === swallow ? "selected" : ""
-              }>${swallow}</option>`
-          )
-          .join("")}
+        ${
+          showSwallow
+            ? getSwallowOptionsForSoup(dishName)
+                .map(
+                  (swallow) => `<option value="${swallow}">${swallow}</option>`
+                )
+                .join("")
+            : ""
+        }
       </select>
     </div>
     <button type="button" class="remove-item">×</button>
@@ -99,6 +124,15 @@ function createOrderRow(dishName = "", quantity = 1, swallow = "") {
     updateTotals();
   });
 
+  // Initialize swallow select state for pre-selected dishes
+  if (dishName) {
+    const swallowSelect = row.querySelector(".swallow-select");
+    if (!showSwallow) {
+      swallowSelect.innerHTML = '<option value="">No swallow</option>';
+      swallowSelect.disabled = true;
+    }
+  }
+
   orderItems.appendChild(row);
   updateTotals();
   toggleButtons();
@@ -108,8 +142,9 @@ function updateSwallowSelect(selectEl) {
   const dishName = selectEl.value;
   const container = selectEl.closest(".order-item");
   const swallowSelect = container.querySelector(".swallow-select");
+  const shouldShowSwallow = isSoupDish(dishName);
 
-  if (dishName.toLowerCase().includes("soup")) {
+  if (shouldShowSwallow) {
     const options = getSwallowOptionsForSoup(dishName)
       .map((swallow) => `<option value="${swallow}">${swallow}</option>`)
       .join("");
@@ -165,11 +200,11 @@ function addDishToOrder(dishName) {
   if (existing) {
     const qtyInput = existing.querySelector(".qty-input");
     qtyInput.value = +qtyInput.value + 1;
+    updateTotals();
   } else {
     createOrderRow(dishName, 1);
   }
 
-  updateTotals();
   toggleButtons();
   scrollToOrderSection();
   showAddToCartToast(dishName);
@@ -178,23 +213,23 @@ function addDishToOrder(dishName) {
 function scrollToOrderSection() {
   const orderSection = document.getElementById("order");
   if (orderSection) {
-    const offset = 100;
-    const top =
-      orderSection.getBoundingClientRect().top + window.scrollY - offset;
+    const top = orderSection.getBoundingClientRect().top + window.scrollY - 100;
     window.scrollTo({ top, behavior: "smooth" });
   }
 }
 
 function showAddToCartToast(dishName) {
-  const div = document.createElement("div");
-  div.className = "add-to-cart-confirmation";
-  div.textContent = `${dishName} added to order`;
-  document.body.appendChild(div);
-  requestAnimationFrame(() => div.classList.add("show"));
-  setTimeout(() => div.classList.remove("show"), 20000);
-  div.addEventListener("transitionend", () => div.remove());
+  const toast = document.createElement("div");
+  toast.className = "add-to-cart-confirmation";
+  toast.textContent = `${dishName} added to order`;
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => toast.classList.add("show"));
+  setTimeout(() => toast.classList.remove("show"), 2000);
+  toast.addEventListener("transitionend", () => toast.remove());
 }
 
+// Mobile Navigation
 function setupMobileNav() {
   const hamburger = document.querySelector(".hamburger");
   const navLinks = document.querySelector(".nav-links");
