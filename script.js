@@ -386,14 +386,14 @@ orderForm.addEventListener("submit", (e) => {
 
     // Handle swallow information if selected
     if (swallow && swallowQty > 0) {
-      message += ` with ${swallow} (1 included`;
+      message += ` with ${swallow} (`;
 
       // Calculate and add extra portions if any
       const extraPortions = Math.max(0, swallowQty - 1);
       if (extraPortions > 0) {
         const extraTotal = SWALLOW_EXTRA_PRICE * extraPortions;
         subtotal += extraTotal;
-        message += ` + ${extraPortions} extra @₦${SWALLOW_EXTRA_PRICE}`;
+        message += ` + ${extraPortions} extra included @₦${SWALLOW_EXTRA_PRICE}`;
       }
       message += `)`;
     }
