@@ -128,12 +128,27 @@ function createOrderRow(dishName = "", quantity = 1) {
           }
         </select>
       </div>
-      <div class="form-group">
-        <label>Swallow Portions</label>
-        <input type="number" class="form-control swallow-qty" min="0" value="0" ${
-          showSwallow ? "" : "disabled"
-        } />
-      </div>
+     <div class="form-group">
+    ${
+      showSwallow && menuItem
+        ? getSwallowOptions(menuItem.name)
+            .map(
+              (swallow) =>
+                `<option value="${swallow}">${swallow} (1st portion included)</option>`
+            )
+            .join("")
+        : ""
+    }
+  </select>
+</div>
+
+<div class="form-group">
+  <label>Swallow Portions</label>
+  <input type="number" class="form-control swallow-qty" min="0" value="0" ${
+    showSwallow ? "" : "disabled"
+  } />
+  <small class="swallow-help">First portion comes with your soup. Only pay for extras.</small>
+</div>
     </div>
     <span class="item-subtotal">₦0</span>
     <button type="button" class="remove-item">×</button>
@@ -210,29 +225,41 @@ function updateTotals() {
     const menuItem = window.menuItems.find((item) => item.id == dishId);
 
     if (menuItem) {
+      // Main dish price (includes first swallow if selected)
       const itemTotal = menuItem.price * qty;
       subtotal += itemTotal;
 
-      // Update item subtotal display
-      row.querySelector(
-        ".item-subtotal"
-      ).textContent = `₦${itemTotal.toLocaleString()}`;
-
-      // Add swallow cost if applicable
+      // Check for swallow selection and quantities
       const swallowSelect = row.querySelector(".swallow-select");
       const swallowQty =
         parseInt(row.querySelector(".swallow-qty")?.value) || 0;
-      if (swallowSelect && swallowSelect.value && swallowQty > 1) {
-        const swallowPrice = 500; // Fixed price for swallow
-        const swallowTotal = swallowPrice * swallowQty;
-        subtotal += swallowTotal;
-        row.querySelector(".item-subtotal").textContent = `₦${(
-          itemTotal + swallowTotal
-        ).toLocaleString()}`;
+
+      if (swallowSelect?.value && swallowQty > 0) {
+        // Calculate extra portions (total - 1 free portion)
+        const extraPortions = Math.max(0, swallowQty - 1);
+        const extraPortionPrice = 500; // Price per extra portion
+        const extraTotal = extraPortions * extraPortionPrice;
+        subtotal += extraTotal;
+
+        // Update display
+        if (extraPortions > 0) {
+          row.querySelector(
+            ".item-subtotal"
+          ).textContent = `₦${itemTotal.toLocaleString()} + ${extraPortions} extra @₦${extraPortionPrice.toLocaleString()}`;
+        } else {
+          row.querySelector(
+            ".item-subtotal"
+          ).textContent = `₦${itemTotal.toLocaleString()} (1 portion included)`;
+        }
+      } else {
+        row.querySelector(
+          ".item-subtotal"
+        ).textContent = `₦${itemTotal.toLocaleString()}`;
       }
     }
   });
 
+  // Update UI totals
   subtotalElement.textContent = `₦${subtotal.toLocaleString()}`;
   totalAmountElement.textContent = `₦${(
     subtotal + DELIVERY_FEE
@@ -292,7 +319,7 @@ function showAddToCartToast(dishName) {
   document.body.appendChild(toast);
 
   requestAnimationFrame(() => toast.classList.add("show"));
-  setTimeout(() => toast.classList.remove("show"), 5000);
+  setTimeout(() => toast.classList.remove("show"), 2000);
   toast.addEventListener("transitionend", () => toast.remove());
 }
 
@@ -326,6 +353,7 @@ function setupMobileNav() {
 }
 
 // Form Submission
+// Form Submission
 orderForm.addEventListener("submit", (e) => {
   e.preventDefault();
   if (orderItems.children.length === 0) {
@@ -336,6 +364,7 @@ orderForm.addEventListener("submit", (e) => {
   let message =
     "Hello Mummachis Kitchen! I would like to place an order:%0A%0A";
   let subtotal = 0;
+  const SWALLOW_EXTRA_PRICE = 500; // Price for each extra swallow portion
 
   orderItems.querySelectorAll(".order-item").forEach((row, i) => {
     const dishId = row.querySelector(".dish-select").value;
@@ -346,33 +375,50 @@ orderForm.addEventListener("submit", (e) => {
 
     if (!dishId || qty < 1 || !menuItem) return;
 
+    // Calculate main dish total
     const itemTotal = menuItem.price * qty;
     subtotal += itemTotal;
 
+    // Start building the item line
     message += `${i + 1}. ${
       menuItem.name
     } x${qty} – ₦${itemTotal.toLocaleString()}`;
+
+    // Handle swallow information if selected
     if (swallow && swallowQty > 0) {
-      message += ` with ${swallow} x${swallowQty}`;
-      const swallowPrice = 500;
-      subtotal += swallowPrice * swallowQty;
+      message += ` with ${swallow} (1 included`;
+
+      // Calculate and add extra portions if any
+      const extraPortions = Math.max(0, swallowQty - 1);
+      if (extraPortions > 0) {
+        const extraTotal = SWALLOW_EXTRA_PRICE * extraPortions;
+        subtotal += extraTotal;
+        message += ` + ${extraPortions} extra @₦${SWALLOW_EXTRA_PRICE}`;
+      }
+      message += `)`;
     }
-    message += "%0A";
+
+    message += "%0A"; // New line for next item
   });
 
+  // Add delivery fee and total
   message += `%0ADelivery Fee: ₦${DELIVERY_FEE}`;
-  message += `%0A*Total: ₦${(subtotal + DELIVERY_FEE).toLocaleString()}*%0A`;
+  message += `%0A*Total: ₦${(subtotal + DELIVERY_FEE).toLocaleString()}*%0A%0A`;
 
-  if (ordernaInput.value.trim())
-    message += `%0AName: ${encodeURIComponent(ordernaInput.value.trim())}`;
-  if (orderloInput.value.trim())
-    message += `%0ALocation: ${encodeURIComponent(orderloInput.value.trim())}`;
-  if (notesInput.value.trim())
-    message += `%0AInstructions: ${encodeURIComponent(
+  // Add customer information
+  if (ordernaInput.value.trim()) {
+    message += `Name: ${encodeURIComponent(ordernaInput.value.trim())}%0A`;
+  }
+  if (orderloInput.value.trim()) {
+    message += `Location: ${encodeURIComponent(orderloInput.value.trim())}%0A`;
+  }
+  if (notesInput.value.trim()) {
+    message += `Instructions: ${encodeURIComponent(
       notesInput.value.trim()
-    )}`;
+    )}%0A`;
+  }
 
-  message += "%0A%0AThank you!";
+  message += "Thank you!";
   window.open(`https://wa.me/2348035174263?text=${message}`, "_blank");
 });
 
