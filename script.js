@@ -222,7 +222,7 @@ function updateTotals() {
       const swallowSelect = row.querySelector(".swallow-select");
       const swallowQty =
         parseInt(row.querySelector(".swallow-qty")?.value) || 0;
-      if (swallowSelect && swallowSelect.value && swallowQty > 0) {
+      if (swallowSelect && swallowSelect.value && swallowQty > 1) {
         const swallowPrice = 500; // Fixed price for swallow
         const swallowTotal = swallowPrice * swallowQty;
         subtotal += swallowTotal;
@@ -292,7 +292,7 @@ function showAddToCartToast(dishName) {
   document.body.appendChild(toast);
 
   requestAnimationFrame(() => toast.classList.add("show"));
-  setTimeout(() => toast.classList.remove("show"), 2000);
+  setTimeout(() => toast.classList.remove("show"), 5000);
   toast.addEventListener("transitionend", () => toast.remove());
 }
 
