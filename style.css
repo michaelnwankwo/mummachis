@@ -609,6 +609,7 @@ nav ul li a:hover::after {
   gap: 1rem;
   margin-top: 1rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .remove-item {
