@@ -5,9 +5,9 @@ const MAX_ITEMS = 10;
 const DELIVERY_FEE = 500;
 const NON_SWALLOW_DISHES = [
   "rice",
-  "jollof rice",
+  "jollof",
   "fried rice",
-  "ofada rice",
+  "ofada",
   "beans",
   "moi moi",
   "salad",
@@ -38,8 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
 function buildMenuOptions(selected = "") {
   return window.menuItems
     .map(
-      ({ name, price }) => `
-      <option value="${name}" data-price="${price}" ${
+      ({ id, name, price }) => `
+      <option value="${id}" data-price="${price}" ${
         name === selected ? "selected" : ""
       }>
         ${name} – ₦${price.toLocaleString()}
@@ -48,7 +48,7 @@ function buildMenuOptions(selected = "") {
     .join("");
 }
 
-function getSwallowOptionsForSoup(soupName) {
+function getSwallowOptions(soupName) {
   const swallowMap = {
     "Egusi Soup": ["Pounded Yam", "Eba", "Fufu"],
     "Okra Soup": ["Amala", "Eba", "Fufu"],
@@ -60,6 +60,13 @@ function getSwallowOptionsForSoup(soupName) {
   };
   return (
     swallowMap[soupName] || ["Pounded Yam", "Fufu", "Eba", "Semolina", "Wheat"]
+  );
+}
+
+function isRiceDish(dishName) {
+  const riceKeywords = ["rice", "jollof", "fried rice", "ofada"];
+  return riceKeywords.some((keyword) =>
+    dishName.toLowerCase().includes(keyword)
   );
 }
 
@@ -78,12 +85,17 @@ function createOrderRow(dishName = "", quantity = 1) {
     return;
   }
 
+  // Find the menu item by name to get its ID
+  const menuItem = window.menuItems.find((item) => item.name === dishName);
+  const itemId = menuItem ? menuItem.id : "";
+
   const row = document.createElement("div");
   row.className = "order-item";
   const showSwallow = isSoupDish(dishName);
 
   row.innerHTML = `
     <div class="form-group">
+      <label>Select Main Dish</label>
       <select class="form-control dish-select" required>
         <option value="" disabled ${
           !dishName ? "selected" : ""
@@ -92,24 +104,38 @@ function createOrderRow(dishName = "", quantity = 1) {
       </select>
     </div>
     <div class="form-group">
+      <label>Main Dish Quantity</label>
       <input type="number" class="form-control qty-input" min="1" value="${quantity}" required />
     </div>
-    <div class="form-group">
-      <select class="form-control swallow-select" ${
-        showSwallow ? "" : "disabled"
-      }>
-        <option value="">No swallow</option>
-        ${
-          showSwallow
-            ? getSwallowOptionsForSoup(dishName)
-                .map(
-                  (swallow) => `<option value="${swallow}">${swallow}</option>`
-                )
-                .join("")
-            : ""
-        }
-      </select>
+    <div class="swallow-group" style="display: ${
+      showSwallow ? "block" : "none"
+    }">
+      <div class="form-group">
+        <label>Select Swallow</label>
+        <select class="form-control swallow-select" ${
+          showSwallow ? "" : "disabled"
+        }>
+          <option value="">No swallow</option>
+          ${
+            showSwallow && menuItem
+              ? getSwallowOptions(menuItem.name)
+                  .map(
+                    (swallow) =>
+                      `<option value="${swallow}">${swallow}</option>`
+                  )
+                  .join("")
+              : ""
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Swallow Portions</label>
+        <input type="number" class="form-control swallow-qty" min="0" value="0" ${
+          showSwallow ? "" : "disabled"
+        } />
+      </div>
     </div>
+    <span class="item-subtotal">₦0</span>
     <button type="button" class="remove-item">×</button>
   `;
 
@@ -120,17 +146,13 @@ function createOrderRow(dishName = "", quantity = 1) {
   });
 
   row.querySelector(".dish-select").addEventListener("change", (e) => {
-    updateSwallowSelect(e.target);
+    updateSwallowOptions(e.target);
     updateTotals();
   });
 
   // Initialize swallow select state for pre-selected dishes
-  if (dishName) {
-    const swallowSelect = row.querySelector(".swallow-select");
-    if (!showSwallow) {
-      swallowSelect.innerHTML = '<option value="">No swallow</option>';
-      swallowSelect.disabled = true;
-    }
+  if (dishName && menuItem) {
+    updateSwallowOptions(row.querySelector(".dish-select"));
   }
 
   orderItems.appendChild(row);
@@ -138,22 +160,42 @@ function createOrderRow(dishName = "", quantity = 1) {
   toggleButtons();
 }
 
-function updateSwallowSelect(selectEl) {
-  const dishName = selectEl.value;
-  const container = selectEl.closest(".order-item");
+function updateSwallowOptions(selectElement) {
+  const container = selectElement.closest(".order-item");
+  const swallowGroup = container.querySelector(".swallow-group");
   const swallowSelect = container.querySelector(".swallow-select");
-  const shouldShowSwallow = isSoupDish(dishName);
+  const swallowQty = container.querySelector(".swallow-qty");
+  const selectedItem = window.menuItems.find(
+    (item) => item.id == selectElement.value
+  );
 
-  if (shouldShowSwallow) {
-    const options = getSwallowOptionsForSoup(dishName)
-      .map((swallow) => `<option value="${swallow}">${swallow}</option>`)
-      .join("");
-    swallowSelect.innerHTML = `<option value="">No swallow</option>${options}`;
+  // Check if it's a soup (not rice)
+  const isSoup =
+    selectedItem &&
+    isSoupDish(selectedItem.name) &&
+    !isRiceDish(selectedItem.name);
+
+  if (isSoup) {
+    // Show swallow fields for soups
+    swallowGroup.style.display = "block";
     swallowSelect.disabled = false;
+    swallowQty.disabled = false;
+    const options = getSwallowOptions(selectedItem.name);
+    swallowSelect.innerHTML = `
+      <option value="">No swallow</option>
+      ${options
+        .map((option) => `<option value="${option}">${option}</option>`)
+        .join("")}
+    `;
   } else {
-    swallowSelect.innerHTML = `<option value="">No swallow</option>`;
+    // Hide and reset swallow fields for rice/non-soups
+    swallowGroup.style.display = "none";
     swallowSelect.disabled = true;
+    swallowSelect.value = "";
+    swallowQty.disabled = true;
+    swallowQty.value = 0;
   }
+  updateTotals();
 }
 
 // Calculation Functions
@@ -162,10 +204,33 @@ function updateTotals() {
   let subtotal = 0;
 
   rows.forEach((row) => {
-    const dish = row.querySelector(".dish-select").value;
+    const dishSelect = row.querySelector(".dish-select");
+    const dishId = dishSelect.value;
     const qty = parseInt(row.querySelector(".qty-input").value) || 0;
-    const menuItem = window.menuItems.find((item) => item.name === dish);
-    if (menuItem) subtotal += menuItem.price * qty;
+    const menuItem = window.menuItems.find((item) => item.id == dishId);
+
+    if (menuItem) {
+      const itemTotal = menuItem.price * qty;
+      subtotal += itemTotal;
+
+      // Update item subtotal display
+      row.querySelector(
+        ".item-subtotal"
+      ).textContent = `₦${itemTotal.toLocaleString()}`;
+
+      // Add swallow cost if applicable
+      const swallowSelect = row.querySelector(".swallow-select");
+      const swallowQty =
+        parseInt(row.querySelector(".swallow-qty")?.value) || 0;
+      if (swallowSelect && swallowSelect.value && swallowQty > 0) {
+        const swallowPrice = 500; // Fixed price for swallow
+        const swallowTotal = swallowPrice * swallowQty;
+        subtotal += swallowTotal;
+        row.querySelector(".item-subtotal").textContent = `₦${(
+          itemTotal + swallowTotal
+        ).toLocaleString()}`;
+      }
+    }
   });
 
   subtotalElement.textContent = `₦${subtotal.toLocaleString()}`;
@@ -193,7 +258,9 @@ function handleAddToCartClick(e) {
 function addDishToOrder(dishName) {
   const existing = [...orderItems.querySelectorAll(".order-item")].find(
     (row) => {
-      return row.querySelector(".dish-select")?.value === dishName;
+      const select = row.querySelector(".dish-select");
+      const menuItem = window.menuItems.find((item) => item.id == select.value);
+      return menuItem && menuItem.name === dishName;
     }
   );
 
@@ -271,18 +338,25 @@ orderForm.addEventListener("submit", (e) => {
   let subtotal = 0;
 
   orderItems.querySelectorAll(".order-item").forEach((row, i) => {
-    const dish = row.querySelector(".dish-select").value;
+    const dishId = row.querySelector(".dish-select").value;
     const qty = parseInt(row.querySelector(".qty-input").value) || 0;
     const swallow = row.querySelector(".swallow-select").value;
-    const menuItem = window.menuItems.find((item) => item.name === dish);
+    const swallowQty = parseInt(row.querySelector(".swallow-qty").value) || 0;
+    const menuItem = window.menuItems.find((item) => item.id == dishId);
 
-    if (!dish || qty < 1 || !menuItem) return;
+    if (!dishId || qty < 1 || !menuItem) return;
 
     const itemTotal = menuItem.price * qty;
     subtotal += itemTotal;
 
-    message += `${i + 1}. ${dish} x${qty} – ₦${itemTotal.toLocaleString()}`;
-    if (swallow) message += ` with ${swallow}`;
+    message += `${i + 1}. ${
+      menuItem.name
+    } x${qty} – ₦${itemTotal.toLocaleString()}`;
+    if (swallow && swallowQty > 0) {
+      message += ` with ${swallow} x${swallowQty}`;
+      const swallowPrice = 500;
+      subtotal += swallowPrice * swallowQty;
+    }
     message += "%0A";
   });
 
