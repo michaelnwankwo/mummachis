@@ -39,6 +39,8 @@ const CONFIG = {
     "different-swallow": 800,
     "extra-sauce": 500,
   },
+  takeawaySwallowExtraPrice: 500,
+  nonSwallowDishes: ["rice", "stew", "sauce", "beans"], // optional, for smarter soup detection
 };
 
 // ======================
@@ -104,6 +106,19 @@ function setupEventHandlers() {
 // ======================
 // MENU SYSTEM FUNCTIONS
 // ======================
+function buildMenuOptions(selectedDishId = "") {
+  return window.menuItems
+    .map(
+      (item) =>
+        `<option value="${item.id}" ${
+          item.id == selectedDishId ? "selected" : ""
+        }>
+          ${item.name} - ₦${item.price.toLocaleString()}
+        </option>`
+    )
+    .join("");
+}
+
 function populateTakeawayMenu() {
   if (!DOM.containers.takeawayItems) return;
 
@@ -114,29 +129,41 @@ function populateTakeawayMenu() {
     }
 
     const itemHTML = `
-      <div class="order-item">
+    <div class="order-item">
+      <div class="form-group">
+        <label>Select Main Dish</label>
         <select class="form-control dish-select" required>
-          <option value="">Select dish</option>
-          ${window.menuItems
-            .map(
-              (item) => `
-            <option value="${item.id}" data-price="${item.price}">
-              ${item.name} - ₦${item.price.toLocaleString()}
-            </option>
-          `
-            )
-            .join("")}
+          <option value="" disabled selected>Select a dish</option>
+          ${buildMenuOptions()}
         </select>
-        <select class="form-control swallow-select" disabled>
-          <option value="">Select swallow</option>
-        </select>
-        <div class="order-item-actions">
-          <input type="number" class="form-control qty-input" min="1" value="1" required>
-          <span class="item-subtotal">₦0</span>
-          <button type="button" class="remove-item">×</button>
+      </div>
+  
+      <div class="form-group">
+        <label>Main Dish Quantity</label>
+        <input type="number" class="form-control qty-input" min="1" value="1" required />
+      </div>
+  
+      <div class="swallow-group" style="display: none">
+        <div class="form-group">
+          <label>Swallow Type (Takeaway Only)</label>
+          <select class="form-control swallow-select" disabled>
+            <option value="">No swallow</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Total Swallow portions </label>
+          <input type="number" class="form-control swallow-qty" min="0" value="0" disabled />
+          <small class="help-text">First portion included with soup. Only pay for extras.</small>
         </div>
       </div>
-    `;
+  
+      <div class="form-group form-aside">
+        <label>Subtotal:</label>
+        <span class="item-subtotal">₦0</span>
+        <button type="button" class="remove-item">×</button>
+      </div>
+    </div>
+  `;
 
     const itemElement = document.createElement("div");
     itemElement.innerHTML = itemHTML;
@@ -146,10 +173,28 @@ function populateTakeawayMenu() {
     const dishSelect = itemElement.querySelector(".dish-select");
     const qtyInput = itemElement.querySelector(".qty-input");
     const removeBtn = itemElement.querySelector(".remove-item");
+    const swallowQty = itemElement.querySelector(".swallow-qty");
+    const swallowSelect = itemElement.querySelector(".swallow-select");
 
+    // Listen for dish changes
     dishSelect.addEventListener("change", function () {
-      updateSwallowOptions(this);
-      updateOrderTotals();
+      updateTakeawaySwallowOptions(this);
+      updateTakeawayOrderTotals();
+    });
+
+    // Listen for swallow quantity input
+    swallowQty.addEventListener("input", updateTakeawayOrderTotals);
+
+    // Optional: listen for swallow type change
+    swallowSelect.addEventListener("change", updateTakeawayOrderTotals);
+
+    // Update on dish quantity change
+    qtyInput.addEventListener("input", updateTakeawayOrderTotals);
+
+    // Remove item
+    removeBtn.addEventListener("click", function () {
+      itemElement.remove();
+      updateTakeawayOrderTotals();
     });
 
     qtyInput.addEventListener("input", updateOrderTotals);
@@ -163,6 +208,79 @@ function populateTakeawayMenu() {
 
   // Make add function globally available
   window.addTakeawayItem = addMenuItem;
+}
+
+function updateTakeawaySwallowOptions(selectElement) {
+  const container = selectElement.closest(".order-item");
+  const swallowGroup = container.querySelector(".swallow-group");
+  const swallowSelect = container.querySelector(".swallow-select");
+  const swallowQty = container.querySelector(".swallow-qty");
+  const selectedItem = window.menuItems.find(
+    (item) => item.id == selectElement.value
+  );
+
+  const isSoup =
+    selectedItem &&
+    selectedItem.name.toLowerCase().includes("soup") &&
+    !CONFIG.nonSwallowDishes.some((term) =>
+      selectedItem.name.toLowerCase().includes(term)
+    );
+
+  if (isSoup) {
+    swallowGroup.style.display = "block";
+    swallowSelect.disabled = false;
+    swallowQty.disabled = false;
+
+    const options = getSwallowOptions(selectedItem.name);
+    swallowSelect.innerHTML = `
+      <option value="">No swallow</option>
+      ${options
+        .map((opt) => `<option value="${opt}">${opt} (1st included)</option>`)
+        .join("")}
+    `;
+  } else {
+    swallowGroup.style.display = "none";
+    swallowSelect.disabled = true;
+    swallowSelect.value = "";
+    swallowQty.disabled = true;
+    swallowQty.value = 0;
+  }
+
+  updateTakeawayOrderTotals();
+}
+
+function updateTakeawayOrderTotals() {
+  let subtotal = 0;
+  document
+    .querySelectorAll("#takeaway-items-container .order-item")
+    .forEach((item) => {
+      const dishId = item.querySelector(".dish-select").value;
+      const quantity = parseInt(item.querySelector(".qty-input").value) || 0;
+      const swallowQty =
+        parseInt(item.querySelector(".swallow-qty")?.value) || 0;
+      const dish = window.menuItems.find((item) => item.id == dishId);
+
+      if (dish) {
+        let itemTotal = dish.price * quantity;
+        const extraSwallow = Math.max(0, swallowQty - 1);
+        const extraCost = CONFIG.takeawaySwallowExtraPrice * extraSwallow;
+        subtotal += itemTotal + extraCost;
+
+        const label =
+          extraSwallow > 0
+            ? `₦${itemTotal.toLocaleString()} + ${extraSwallow} extra @₦${
+                CONFIG.takeawaySwallowExtraPrice
+              }`
+            : `₦${itemTotal.toLocaleString()} (1 portion included)`;
+
+        item.querySelector(".item-subtotal").textContent = label;
+      }
+    });
+
+  const total = subtotal + CONFIG.deliveryFee;
+  document.getElementById(
+    "total-price"
+  ).textContent = `Total (incl. ₦${CONFIG.deliveryFee.toLocaleString()} delivery): ₦${total.toLocaleString()}`;
 }
 
 function setupOnDemandMenu() {
@@ -391,52 +509,63 @@ function submitTakeawayOrder() {
     items: [],
   };
 
-  // Collect order items
-  document.querySelectorAll(".order-item").forEach((item, index) => {
-    const dishId = item.querySelector(".dish-select").value;
-    const quantity = item.querySelector(".qty-input").value;
-    const swallow = item.querySelector(".swallow-select").value;
-    const dish = window.menuItems.find((item) => item.id == dishId);
+  document
+    .querySelectorAll("#takeaway-items-container .order-item")
+    .forEach((item) => {
+      const dishId = item.querySelector(".dish-select").value;
+      const quantity = parseInt(item.querySelector(".qty-input").value);
+      const swallow = item.querySelector(".swallow-select").value;
+      const swallowQty =
+        parseInt(item.querySelector(".swallow-qty")?.value) || 0;
+      const dish = window.menuItems.find((item) => item.id == dishId);
 
-    if (dish && quantity > 0) {
-      formData.items.push({
-        name: dish.name,
-        quantity: quantity,
-        swallow: swallow,
-        price: dish.price * quantity,
-      });
-    }
-  });
+      if (dish && quantity > 0) {
+        const itemTotal = dish.price * quantity;
+        const extraSwallow = Math.max(0, swallowQty - 1);
+        const extraCost = CONFIG.takeawaySwallowExtraPrice * extraSwallow;
 
-  if (!validateRequiredFields(formData) || formData.items.length === 0) {
+        let swallowInfo = swallow ? ` with ${swallow} (1 included` : "";
+        if (swallow && extraSwallow > 0) {
+          swallowInfo += ` + ${extraSwallow} extra @₦${CONFIG.takeawaySwallowExtraPrice}`;
+        }
+        if (swallow) swallowInfo += `)`;
+
+        formData.items.push({
+          name: dish.name,
+          quantity,
+          swallow: swallowInfo,
+          price: itemTotal + extraCost,
+        });
+      }
+    });
+
+  if (
+    !formData.name ||
+    !formData.phone ||
+    !formData.date ||
+    !formData.time ||
+    formData.items.length === 0
+  ) {
     alert("Please fill all required fields and add at least one item");
     return;
   }
 
   const itemsText = formData.items
     .map(
-      (item, index) =>
-        `${index + 1}. ${item.name} x${item.quantity}${
-          item.swallow ? ` with ${item.swallow}` : ""
+      (item, i) =>
+        `${i + 1}. ${item.name} x${item.quantity}${
+          item.swallow || ""
         } - ₦${item.price.toLocaleString()}`
     )
     .join("\n");
 
-  const message = `🛍️ *Takeaway Order*\n\n
-📞 Phone: ${formData.phone}
-📅 Pickup Date: ${formData.date}
-🕒 Pickup Time: ${formData.time}
-
-🧾 Order Items:
-${itemsText}
-
-🚚 Delivery Fee: ₦${CONFIG.deliveryFee.toLocaleString()}
-💵 Total: ₦${
-    formData.items.reduce((sum, item) => sum + item.price, 0) +
-    CONFIG.deliveryFee
-  }
-
-📝 Notes: ${formData.notes || "None"}`;
+  const message = `🛍️ *Takeaway Order*\n\n📞 Phone: ${
+    formData.phone
+  }\n📅 Pickup Date: ${formData.date}\n🕒 Pickup Time: ${
+    formData.time
+  }\n\n🧾 Order Items:\n${itemsText}\n\n🚚 Delivery Fee: ₦${CONFIG.deliveryFee.toLocaleString()}\n💵 Total: ₦${
+    formData.items.reduce((sum, i) => sum + i.price, 0) + CONFIG.deliveryFee
+  }\n\n📝 Notes: ${formData.notes || "None"}`;
 
   sendWhatsAppMessage(message);
 }
