@@ -102,7 +102,7 @@
 
 .form-group {
   flex: 1;
-    margin-bottom: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
 }
 
 .form-group label {
@@ -534,14 +534,85 @@
   }
 }
 
-#custom-price,#total-price {
-  color: #ff7a18;
-  margin-bottom: 1rem;
-}
-
-
 .form-aside {
   display: flex;
   flex-direction: row;
   gap: 0.5rem;
+}
+
+/* Wrapper for all tab-content areas */
+.tab-content {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: #fff;
+}
+
+/* Each form item */
+.form-group {
+  margin-bottom: 1.2rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+/* Order item box (used in takeaway) */
+.order-item {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+/* Input row like quantity + remove */
+.order-item-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.item-subtotal {
+  font-size: 0.7rem;
+  color: #444;
+}
+
+.remove-item {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.remove-item:hover {
+  background: #c0392b;
+}
+
+/* Fix select on mobile */
+select.form-control:focus {
+  font-size: 16px;
+}
+
+#total-price {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #ff7a18; /* warm orange fire */
+  margin-bottom: 1rem;
 }
