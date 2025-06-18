@@ -1141,3 +1141,9 @@ footer {
   font-weight: 500;
   margin-left: 8px;
 }
+
+#bouncingImage {
+  position: relative;
+  transition: transform 0.2s ease, border-radius 0.2s ease;
+  border-radius: 10px; /* default */
+}
