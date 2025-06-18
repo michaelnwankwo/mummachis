@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
   createOrderRow();
   toggleButtons();
   setupMobileNav();
+  bounceImage("bouncingImage");
 });
 
 // Menu Utilities
@@ -323,6 +324,70 @@ function showAddToCartToast(dishName) {
   toast.addEventListener("transitionend", () => toast.remove());
 }
 
+function bounceImage(elementId, options = {}) {
+  const img = document.getElementById(elementId);
+  if (!img) return;
+
+  // Default options with your original scaling logic
+  const {
+    minScale = 0.7,
+    maxScale = 1.0,
+    scaleStep = 0.05,
+    interval = 130,
+    bounceHeight = 20,
+    wobbleIntensity = 5, // degrees
+  } = options;
+
+  let scale = maxScale;
+  let shrinking = true;
+
+  // Add CSS for smooth transitions
+  img.style.transition = `transform ${interval}ms ease-out`;
+  img.style.transformOrigin = "center bottom";
+  img.style.display = "inline-block";
+
+  const animate = () => {
+    if (shrinking) {
+      scale -= scaleStep;
+      if (scale <= minScale) shrinking = false;
+    } else {
+      scale += scaleStep;
+      if (scale >= maxScale) shrinking = true;
+    }
+
+    // Enhanced bounce effect with vertical movement and wobble
+    const verticalBounce = (1 - scale) * bounceHeight;
+    const wobble = (1 - scale) * wobbleIntensity;
+
+    img.style.transform = `
+      scale(${scale}) 
+      translateY(-${verticalBounce}px) 
+      rotate(${wobble}deg)
+    `;
+
+    // Keep your cool rounding effect
+    img.style.borderRadius = `${(1 - scale) * 100}px`;
+  };
+
+  // Start animation
+  const animationInterval = setInterval(animate, interval);
+
+  // Cleanup function
+  return () => clearInterval(animationInterval);
+}
+
+// Usage example:
+const stopBounce = bounceImage("myImage", {
+  minScale: 0.6, // More extreme squash
+  maxScale: 1.1, // Bigger stretch
+  scaleStep: 0.03, // Smoother steps
+  interval: 50, // Faster animation
+  bounceHeight: 30, // Higher bounce
+  wobbleIntensity: 8, // More wobble
+});
+
+// Call stopBounce() when you want to stop the animation
+
 // Mobile Navigation
 function setupMobileNav() {
   const hamburger = document.querySelector(".hamburger");
@@ -352,7 +417,6 @@ function setupMobileNav() {
   });
 }
 
-// Form Submission
 // Form Submission
 orderForm.addEventListener("submit", (e) => {
   e.preventDefault();
