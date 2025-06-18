@@ -538,3 +538,10 @@
   color: #ff7a18;
   margin-bottom: 1rem;
 }
+
+
+.form-aside {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
