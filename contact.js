@@ -86,7 +86,7 @@ function initializeDatePickers() {
 }
 
 function initializeTimeSlots() {
-  generateTimeSlots("time-slots", "takeaway-time");
+  populateTimeDropdown("takeaway-time");
   generateTimeSlots("time-slots-demand", "on-demand-time");
 }
 
@@ -101,6 +101,18 @@ function setupEventHandlers() {
   setupTabSwitching();
   setupFormSubmissions();
   setupHamburgerMenu();
+}
+
+function populateTimeDropdown(selectId) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+
+  select.innerHTML = `
+    <option value="">Select a time</option>
+    ${CONFIG.timeSlots
+      .map((time) => `<option value="${time}">${time}</option>`)
+      .join("")}
+  `;
 }
 
 // ======================
@@ -145,7 +157,7 @@ function populateTakeawayMenu() {
   
       <div class="swallow-group" style="display: none">
         <div class="form-group">
-          <label>Swallow Type (Takeaway Only)</label>
+          <label>Swallow Type</label>
           <select class="form-control swallow-select" disabled>
             <option value="">No swallow</option>
           </select>
